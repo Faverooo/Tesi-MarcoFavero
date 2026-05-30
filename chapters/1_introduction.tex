@@ -1,27 +1,8 @@
 \chapter{Introduzione}
 \label{chap:introduzione}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[alt={Testo alternativo dell'immagine}, width=1\columnwidth]{img/quantum_entanglement.jpeg}
-    \caption{Lorem}
-    \label{fig:entanglement}
-\end{figure}
-
-Introduzione al contesto applicativo.
-
-Lorem Figure \ref{fig:entanglement}
-
-Esempio di utilizzo di un termine nel glossario \gls{api}.
-
-Esempio di citazione direttamente nel testo \cite{site:agile-manifesto}.
-
-Esempio di citazione nel piè di pagina \footcite{womak:lean-thinking}.
-
-\lipsum[1-2]
-
 \section{L'azienda}
-Spazio Dev S.r.l. è una software house con sede a Tombolo, in provincia di Padova, nata dall'iniziativa di due soci fondatori. Nel corso degli anni l’azienda è cresciuta fino a raggiungere un organico di circa 17 dipendenti, specializzandosi nello sviluppo di soluzioni digitali innovative per imprese e attività produttive.
+Spazio Dev S.r.l. è una software house con sede a Tombolo, in provincia di Padova, nata dall'iniziativa di due soci fondatori. Nel corso degli anni l'azienda è cresciuta fino a raggiungere un organico di circa 17 dipendenti, specializzandosi nello sviluppo di soluzioni digitali innovative per imprese e attività produttive.
 
 L'azienda opera principalmente nel settore dello sviluppo web e dell'automazione dei processi aziendali, offrendo servizi quali realizzazione di siti web, piattaforme e-commerce e software personalizzati. Inoltre, integra tecnologie basate sull'intelligenza artificiale per migliorare l' efficienza produttiva e consentire il monitoraggio in tempo reale delle attività aziendali. Il logo dell'azienda è riportato nella figura \ref{fig:spazio-dev-logo}.
 \begin{figure}
@@ -44,8 +25,27 @@ Le loro soluzioni attualmente sono:
 \end{itemize}
 
 \section{L'idea}
-Introduzione all'idea dello stage\footcite{article:spooky}.
-\lipsum[1-3]
+Il progetto Brain nasce come software ERP personalizzato, sviluppato su commissione dell'azienda Falmec S.p.a., con l'obiettivo di ottimizzare i processi produttivi e migliorare la gestione operativa aziendale.
+
+Il sistema è progettato per incrementare l'efficienza produttiva, consentire il monitoraggio in tempo reale delle attività e supportare una gestione più accurata delle risorse aziendali.
+
+Le principali funzionalità offerte dal software sono le seguenti:
+
+\begin{itemize}
+\item \textbf{Previsione della domanda}: il sistema analizza le serie storiche degli ordini e dei dati aziendali per stimare la domanda futura, permettendo una 
+pianificazione della produzione più precisa ed efficace.
+\item \textbf{Gestione delle risorse}: sulla base delle previsioni generate, il software consente di amministrare in modo efficiente le risorse disponibili, monitorando acquisti, vendite, 
+materiali provenienti da terzi e tutti i componenti necessari alla realizzazione del prodotto finito.
+\item \textbf{Schedulazione della produzione}: il sistema permette di pianificare e ottimizzare le attività produttive considerando disponibilità delle risorse, 
+tempi di lavorazione e scadenze, con l'obiettivo di ridurre i tempi di inattività e massimizzare la produttività.
+\end{itemize}
+
+L'obiettivo principale del progetto è trasformare il processo produttivo da un approccio reattivo a uno proattivo. Attraverso la previsione degli ordini, il sistema consente infatti di anticipare la produzione e organizzare in anticipo le risorse necessarie, migliorando l'efficienza operativa e riducendo i ritardi nelle consegne.
+
+\section{Il mio ruolo}
+Il team di sviluppo del progetto Brain era composto da 3 persone, a cui mi sono unito durante il mio periodo di stage. Il mio ruolo all'interno del team, a progetto 
+già avviato, è stato quello di lavorare al cuore del solver di schedulazione basato su OR-Tools, un framework open source sviluppato da Google per la risoluzione di problemi di ottimizzazione.
+In particolare il solver è scritto in cpp e viene integrato tramite API REST con il resto del software, scritto in Laravel e Filament.
 
 \section{Organizzazione del testo}
 \begin{description}

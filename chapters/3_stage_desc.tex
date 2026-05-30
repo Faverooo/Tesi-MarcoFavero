@@ -1,14 +1,52 @@
 \chapter{Descrizione dello stage}
 \label{chap:descrizione-stage}
 
-\section{Introduzione al progetto}
-\begin{figure}[H] 
-    \centering 
-    \includegraphics[alt={Testo alternativo dell'immagine}, width=0.5\columnwidth]{img/pk_estate.jpeg}
-    \caption{Caption}
-    \label{fig:pk_estate}
-\end{figure}
-\lipsum[1]
+\section{Descrizione del contesto aziendale}
+
+Nonostante Spazio Dev sia una realtà di recente fondazione, l'organizzazione interna è caratterizzata da processi ben definiti e da una forte attenzione alla qualità del lavoro svolto e alla soddisfazione del cliente.
+
+Durante il periodo di stage ho collaborato con un team composto da tre persone. In un contesto di dimensioni ridotte, la comunicazione costante e il coordinamento tra i membri del gruppo risultano fondamentali per rispondere efficacemente alle esigenze del cliente e garantire il successo del progetto.
+
+\subsection{Modello Agile}
+
+L'azienda adotta il framework Scrum come metodologia di sviluppo Agile, organizzando il lavoro in sprint della durata di una settimana.
+
+All'inizio di ogni sprint viene svolta una riunione di pianificazione alla quale partecipa anche il cliente. Durante questo incontro vengono raccolti i nuovi requisiti, valutati gli avanzamenti del progetto e definite le attività da svolgere nella settimana successiva. I compiti vengono quindi distribuiti tra i membri del team in base alle competenze e alle priorità individuate.
+
+Il ruolo di \textit{Product Owner} è svolto dai titolari dell'azienda, che fungono da riferimento per il cliente, raccolgono i requisiti e stabiliscono le priorità delle attività da realizzare.
+
+Il ruolo di \textit{Scrum Master} è ricoperto da uno dei titolari, il quale ha il compito di facilitare la comunicazione all'interno del team, rimuovere eventuali ostacoli e assicurare il corretto svolgimento del processo Scrum.
+
+Il \textit{Development Team} è composto da tutti i membri del gruppo di lavoro, che collaborano attivamente allo sviluppo del prodotto, condividendo competenze e responsabilità per raggiungere gli obiettivi prefissati entro ciascuno sprint.
+
+\subsection{Issue Tracking, Version Control e Code Review}
+
+Per la gestione delle attività di sviluppo, l'azienda utilizza Plane come sistema di \textit{issue tracking}. Le attività vengono organizzate attraverso board in stile Kanban e assegnate ai membri del team in base alle competenze e alle priorità definite durante le riunioni di pianificazione degli sprint.
+
+I task sono inoltre raggruppati in moduli corrispondenti alle diverse aree del progetto, facilitando la suddivisione del lavoro e il monitoraggio dell'avanzamento delle varie componenti applicative. In accordo con il cliente, vengono inoltre stabilite specifiche milestone che scandiscono il rilascio progressivo delle funzionalità previste.
+
+Per il controllo di versione del codice sorgente viene utilizzato Git, con repository ospitati sulla piattaforma Gitea. Le modifiche vengono integrate nel progetto attraverso un processo di \textit{code review} basato su \textit{pull request}, che prevede la verifica e l'approvazione da parte di almeno uno sviluppatore senior prima della fusione nel ramo di destinazione.
+
+A supporto di questo processo viene inoltre impiegato un sistema automatizzato di revisione del codice basato su intelligenza artificiale, in grado di individuare potenziali problematiche, evidenziare possibili miglioramenti e contribuire al mantenimento della qualità del codice.
+
+Il flusso di sviluppo adottato segue il modello \textit{GitFlow}, articolato nei seguenti rami principali:
+
+\begin{itemize}
+    \item \textbf{main}: contiene il codice stabile e pronto per il rilascio in produzione;
+    \item \textbf{develop}: rappresenta il ramo di integrazione delle funzionalità in fase di sviluppo e costituisce la base per le future release;
+    \item \textbf{feature}: rami temporanei dedicati allo sviluppo di nuove funzionalità o miglioramenti, creati a partire da \textit{develop} e successivamente reintegrati nello stesso;
+    \item \textbf{release}: rami utilizzati per la preparazione di una nuova versione del software, nei quali vengono effettuate le attività di testing finale e correzione dei bug;
+    \item \textbf{hotfix}: rami creati a partire da \textit{main} per la risoluzione rapida di problemi critici riscontrati in ambiente di produzione; una volta completati, vengono reintegrati sia in \textit{main} sia in \textit{develop}.
+\end{itemize}
+
+\subsection{Il solver}
+Come anticipato il progetto proposto dal cliente è ambizioso e complesso, di fatti il team ci lavora da mesi. La parte che verrà trattata in questo stage è 
+quella relativa allo sviluppo del solver di scheduling, ovvero il componente software che si occupa di risolvere i problemi di ottimizzazione, in 
+particolare quelli legati alla pianificazione e all'allocazione delle risorse.
+Questo modulo viene integrato tramite api con la libreria Drogon, che consente di esporre le funzionalità del solver attraverso un'interfaccia, 
+l'accesso e l'utilizzo da parte del prodotto principale scritto in PHP. 
+Nonostante ciò durante lo stage è stata sviluppata un interfaccia in qt di debug utile per testare e verificare il corretto funzionamento del solver.
+DA FARE DA FARE
 
 \section{Analisi preventiva dei rischi}
 
