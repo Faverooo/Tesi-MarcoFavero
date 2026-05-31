@@ -40,23 +40,45 @@ Il flusso di sviluppo adottato segue il modello \textit{GitFlow}, articolato nei
 \end{itemize}
 
 \subsection{Il solver}
-Come anticipato il progetto proposto dal cliente è ambizioso e complesso, di fatti il team ci lavora da mesi. La parte che verrà trattata in questo stage è 
-quella relativa allo sviluppo del solver di scheduling, ovvero il componente software che si occupa di risolvere i problemi di ottimizzazione, in 
-particolare quelli legati alla pianificazione e all'allocazione delle risorse.
-Questo modulo viene integrato tramite api con la libreria Drogon, che consente di esporre le funzionalità del solver attraverso un'interfaccia, 
-l'accesso e l'utilizzo da parte del prodotto principale scritto in PHP. 
-Nonostante ciò durante lo stage è stata sviluppata un interfaccia in qt di debug utile per testare e verificare il corretto funzionamento del solver.
-DA FARE DA FARE
+
+Come anticipato, il progetto proposto dal cliente presenta un elevato livello di complessità e richiede uno sviluppo continuativo che coinvolge il team da diversi mesi. L'attività svolta durante il periodo di stage si è concentrata in particolare sullo sviluppo del \textit{solver di scheduling}, ovvero il componente software responsabile della risoluzione di problemi di ottimizzazione legati alla pianificazione delle attività e all'allocazione delle risorse disponibili.
+
+Il solver costituisce il nucleo computazionale del sistema e ha il compito di individuare soluzioni ottimali o quasi ottimali nel rispetto di un insieme di vincoli definiti dal dominio applicativo. Per consentirne l'integrazione con il prodotto principale, il modulo viene esposto tramite API sviluppate utilizzando il framework Drogon. Questa architettura permette all'applicazione principale, realizzata in PHP, di interagire con il solver in modo trasparente e indipendente dall'implementazione sottostante.
+
+Parallelamente allo sviluppo del modulo, durante lo stage è stata realizzata un'applicazione desktop basata su Qt con finalità di debug e testing. Tale strumento si è rivelato particolarmente utile per verificare il corretto funzionamento degli algoritmi implementati, facilitare l'individuazione di eventuali anomalie e velocizzare le attività di sviluppo.
+
+La scelta del linguaggio C++ per l'implementazione del solver è stata motivata dalle elevate prestazioni offerte e dall'efficienza nella gestione di strutture dati e algoritmi complessi. Queste caratteristiche risultano particolarmente importanti in un contesto di scheduling, nel quale è necessario affrontare problemi di ottimizzazione di grandi dimensioni e caratterizzati da numerosi vincoli.
+
+Lo sviluppo del solver ha richiesto una stretta collaborazione con il team responsabile dell'applicazione principale, poiché le funzionalità implementate dovevano integrarsi correttamente con il backend esistente e soddisfare i requisiti funzionali richiesti dal cliente. Questo ha reso necessario un confronto costante tra i diversi gruppi di lavoro, favorendo una migliore comprensione dell'architettura complessiva del sistema e delle esigenze operative del progetto.
+
 
 \section{Analisi preventiva dei rischi}
 
 Durante la fase di analisi iniziale sono stati individuati alcuni possibili rischi a cui si potrà andare incontro.
-Si è quindi proceduto a elaborare delle possibili soluzioni per far fronte a tali rischi.
+Si è quindi proceduto a elaborare delle possibili soluzioni per far fronte a tali rischi. \\
 
-\begin{risk}{Performance del simulatore hardware}
-    \riskdescription{le performance del simulatore hardware e la comunicazione con questo potrebbero risultare lenti o non abbastanza buoni da causare il fallimento dei test}
-    \risksolution{coinvolgimento del responsabile a capo del progetto relativo il simulatore hardware}
-    \label{risk:hardware-simulator} 
+\begin{risk}{Complessità algoritmica della schedulazione a capacità finita}
+    \riskdescription{La modellazione dettagliata dei vincoli di capacità e delle sequenze operative per i reparti pilota Laser e Assemblaggio potrebbe presentare una complessità algoritmica superiore al previsto, con il rischio di rallentare lo sviluppo del motore di schedulazione}
+    \risksolution{Adozione di una strategia di sviluppo strettamente incrementale: Introduzione graduale dei vincoli e delle funzionalità, partendo da un modello semplificato e aggiungendo progressivamente complessità. In questo modo sarà possibile identificare tempestivamente eventuali colli di bottiglia e ottimizzare l'implementazione del solver in modo iterativo}
+    \label{risk:complessita-algoritmica} 
+\end{risk}
+
+\begin{risk}{Incompletezza o inconsistenza dei dati di produzione reali}
+    \riskdescription{I dati reali necessari per alimentare il prototipo e testare i flussi di pianificazione potrebbero risultare frammentati, non aggiornati o di difficile estrazione dai sistemi aziendali, ostacolando le attività di modellazione e test}
+    \risksolution{Questo problema potrebbe persistere anche in produzione, per questo modivo bisogna prevedere tutti i casi limite e gestire in modo robusto eventuali anomalie o mancanze nei dati. Per il prototipo, si prevede di utilizzare dataset sintetici o anonimizzati basati su dati reali, in modo da garantire la validità dei test e la rappresentatività delle situazioni operative senza dipendere esclusivamente dai dati di produzione}
+    \label{risk:qualita-dati} 
+\end{risk}
+
+\begin{risk}{Sforamento dei tempi nello sviluppo dell'interfaccia grafica}
+    \riskdescription{La realizzazione delle viste tabellari e dei diagrammi di Gantt interattivi per la consultazione e modifica manuale del piano potrebbe richiedere uno sforzo implementativo frontend superiore alle ore preventivate}
+    \risksolution{Utilizzo e integrazione di librerie componenti già consolidate (Qt6) per la renderizzazione delle linee temporali e dei grafici, evitando lo sviluppo di componenti grafiche complesse da zero e garantendo così il rispetto dei requisiti obbligatori}
+    \label{risk:sviluppo-interfaccia} 
+\end{risk}
+
+\begin{risk}{Instabilità o ambiguità nella logica di stima ATP}
+    \riskdescription{L'introduzione della logica di stima Available To Promise (ATP) risente fortemente delle repentine modifiche manuali alle priorità operative, rischiando di restituire date di disponibilità indicative non stabili o di difficile validazione}
+    \risksolution{Circoscrizione della logica ATP a uno scenario deterministico ben definito e semplificato per il prototipo. Eventuali casi limite non gestiti o comportamenti dinamici complessi verranno formalmente documentati nella relazione finale come evoluzioni future del progetto}
+    \label{risk:stabilita-atp} 
 \end{risk}
 
 \section{Requisiti e obiettivi}
@@ -65,13 +87,13 @@ Si è quindi proceduto a elaborare delle possibili soluzioni per far fronte a ta
     \rowcolors{1}{}{tableGray}
     \begin{longtable}{|p{2.25cm}|p{7.75cm}|p{2.25cm}|}
     \hline
-    \multicolumn{1}{|c|}{\textbf{A}} & \multicolumn{1}{c|}{\textbf{B}}\\ 
+    \multicolumn{1}{|c|}{\textbf{Codice}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Tipologia}} \\ 
     \hline 
     \endfirsthead
     \rowcolor{white}
     \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- Continuo della tabella}}\\
     \hline
-    \multicolumn{1}{|c|}{\textbf{A}} & \multicolumn{1}{c|}{B}\\ \hline 
+    \multicolumn{1}{|c|}{\textbf{Codice}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Tipologia}} \\ \hline 
     \endhead
     \hline
     \rowcolor{white}
@@ -80,36 +102,48 @@ Si è quindi proceduto a elaborare delle possibili soluzioni per far fronte a ta
     \endfoot
     \endlastfoot 
     
-    AA & BB \\
+    O01 & Analizzare i requisiti del dominio produttivo e implementare un prototipo di schedulazione dettagliata per un sottoinsieme di reparti e vincoli. & Obbligatorio \\
     \hline
-    AA & BB \\
+    O02 & Realizzare un'interfaccia applicativa per visualizzare il piano di produzione e supportare modifiche manuali controllate. & Obbligatorio \\
     \hline
-    AA & BB \\
+    O03 & Implementare una stima ATP semplificata, validare il prototipo con casi di test e produrre documentazione tecnica e finale. & Obbligatorio \\
     \hline
-    AA & BB \\
+    D01 & Introdurre indicatori base sul carico delle risorse e sugli ordini potenzialmente in ritardo. & Desiderabile \\
+    \hline
+    D02 & Aggiungere filtri, ordinamenti o piccole funzionalità di esportazione per facilitare l'analisi del piano. & Desiderabile \\
+    \hline
+    D03 & Predisporre dati di esempio e scenari di test riutilizzabili per future estensioni del progetto. & Desiderabile \\
+    \hline
+    F01 & Evidenziare visivamente conflitti o sovraccarichi nelle viste di pianificazione. & Facoltativo \\
+    \hline
+    F02 & Introdurre una semplice simulazione "what-if" su priorità o date di inserimento ordine. & Facoltativo \\
+    \hline
+    F03 & Preparare una schermata riepilogativa con KPI essenziali per il monitoraggio del prototipo. & Facoltativo \\
     \hline
     \hiderowcolors
-    \caption{Lorem.}
+    \caption{Requisiti e obiettivi dello stage.}
     \label{tab:requisiti_obbiettivi}
     \end{longtable}
 \end{center}
 
 \section{Pianificazione}
-\begin{figure}[H]
-    \centering
-    \includegraphics[alt={Testo alternativo dell'immagine}, width=0.5\columnwidth]{img/pk_estate.jpeg}
-    \caption{Caption}
-    \label{fig:pk_estate_2}
-\end{figure}
-\lipsum[1]
 
-\subsection{subsection}
-\lipsum[1]
+\subsection{Ripartizione delle attività}
 
-\subsubsection{subsubsection}
-\lipsum[1]
+Il periodo di stage ha previsto un impegno complessivo di 300 ore, distribuite nell'arco di otto settimane. Durante questo periodo le attività sono state organizzate secondo una pianificazione flessibile, adattata alle esigenze del progetto e alle priorità definite dal team di sviluppo.
 
-\paragraph{paragraph}
-\lipsum[1]
+Nelle prime settimane l'attività si è concentrata principalmente sull'analisi del progetto, sulla comprensione dell'architettura software esistente e sulla configurazione dell'ambiente di sviluppo. Successivamente, il lavoro è proseguito con lo studio del dominio applicativo e con lo sviluppo delle funzionalità assegnate all'interno del solver di scheduling.
+
+Le settimane centrali sono state dedicate principalmente all'implementazione e al miglioramento degli algoritmi di schedulazione, alla gestione dei vincoli richiesti dal cliente e all'integrazione delle nuove funzionalità con il backend del sistema. Parallelamente sono state svolte attività di testing, debugging e validazione dei risultati prodotti dal solver.
+
+Nella fase finale dello stage l'attenzione si è concentrata sulla rifinitura delle funzionalità sviluppate, sulla risoluzione delle problematiche emerse durante i test e sulla produzione della documentazione tecnica necessaria a supportare il progetto.
+
+\subsection{Interazione con l'azienda e il tutor}
+
+Durante l'intero periodo di stage ho collaborato costantemente con il tutor aziendale, Matteo Forzan, e con gli altri membri del team di sviluppo. La comunicazione è avvenuta attraverso incontri periodici, generalmente organizzati due o tre volte alla settimana, durante i quali venivano definiti gli obiettivi a breve termine, monitorato lo stato di avanzamento delle attività e affrontate eventuali problematiche tecniche.
+
+Gli incontri di inizio settimana erano dedicati principalmente alla pianificazione delle attività e alla definizione delle priorità. Nel corso della settimana venivano invece effettuati momenti di confronto per chiarire dubbi, discutere possibili soluzioni e verificare l'avanzamento del lavoro svolto. Al termine della settimana venivano infine analizzati i risultati ottenuti e raccolti feedback utili per orientare le attività successive.
+
+Lo stage si è svolto prevalentemente in presenza, favorendo una comunicazione diretta e una collaborazione continua con il team. Il codice sviluppato è stato regolarmente sottoposto a processi di \textit{code review}, che hanno permesso di verificarne la qualità, la correttezza e la conformità agli standard adottati dall'azienda. Oltre agli incontri programmati, il tutor aziendale ha garantito un supporto costante attraverso strumenti di messaggistica e chiamate, fornendo assistenza ogni volta che si sono presentate necessità di approfondimento o confronto tecnico.
 
 \newpage
