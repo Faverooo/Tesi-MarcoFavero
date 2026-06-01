@@ -19,6 +19,13 @@ Il ruolo di \textit{Scrum Master} è ricoperto da uno dei titolari, il quale ha 
 
 Il \textit{Development Team} è composto da tutti i membri del gruppo di lavoro, che collaborano attivamente allo sviluppo del prodotto, condividendo competenze e responsabilità per raggiungere gli obiettivi prefissati entro ciascuno sprint.
 
+\begin{figure}
+    \centering
+    \includegraphics[alt={Framework Scrum}, width=1\columnwidth]{img/Introduzione/scrum_process.jpg}
+    \caption{Framework Scrum}
+    \label{fig:scrum-framework}
+\end{figure}
+
 \subsection{Issue Tracking, Version Control e Code Review}
 
 Per la gestione delle attività di sviluppo, l'azienda utilizza Plane come sistema di \textit{issue tracking}. Le attività vengono organizzate attraverso board in stile Kanban e assegnate ai membri del team in base alle competenze e alle priorità definite durante le riunioni di pianificazione degli sprint.
@@ -39,6 +46,13 @@ Il flusso di sviluppo adottato segue il modello \textit{GitFlow}, articolato nei
     \item \textbf{hotfix}: rami creati a partire da \textit{main} per la risoluzione rapida di problemi critici riscontrati in ambiente di produzione; una volta completati, vengono reintegrati sia in \textit{main} sia in \textit{develop}.
 \end{itemize}
 
+\begin{figure}
+    \centering
+    \includegraphics[alt={Gitflow model}, width=1\columnwidth]{img/Introduzione/gitflow.png}
+    \caption{Modello GitFlow}
+    \label{fig:gitflow-model}
+\end{figure}
+
 \subsection{Il solver}
 
 Come anticipato, il progetto proposto dal cliente presenta un elevato livello di complessità e richiede uno sviluppo continuativo che coinvolge il team da diversi mesi. L'attività svolta durante il periodo di stage si è concentrata in particolare sullo sviluppo del \textit{solver di scheduling}, ovvero il componente software responsabile della risoluzione di problemi di ottimizzazione legati alla pianificazione delle attività e all'allocazione delle risorse disponibili.
@@ -51,6 +65,12 @@ La scelta del linguaggio C++ per l'implementazione del solver è stata motivata 
 
 Lo sviluppo del solver ha richiesto una stretta collaborazione con il team responsabile dell'applicazione principale, poiché le funzionalità implementate dovevano integrarsi correttamente con il backend esistente e soddisfare i requisiti funzionali richiesti dal cliente. Questo ha reso necessario un confronto costante tra i diversi gruppi di lavoro, favorendo una migliore comprensione dell'architettura complessiva del sistema e delle esigenze operative del progetto.
 
+\begin{figure}
+    \centering
+    \includegraphics[alt={Logo di OR-Tools}, width=0.8\columnwidth]{img/Introduzione/OR-Tools.jpg}
+    \caption{Logo di OR-Tools}
+    \label{fig:or-tools-logo}
+\end{figure}
 
 \section{Analisi preventiva dei rischi}
 
