@@ -1,160 +1,502 @@
 \chapter{Analisi dei requisiti}
 \label{chap:analisi-requisiti}
 
+\section{Analisi degli utenti}
+
+Il sistema sviluppato nel contesto dello stage è un'applicazione desktop realizzata in Qt che consente di configurare, avviare e consultare pianificazioni di produzione generate tramite un solver di schedulazione a capacità finita basato su Google OR-Tools.
+
+L'utente che interagisce con il sistema viene indicato come \textbf{Operatore}. Con questo termine si intende qualsiasi persona autorizzata a usare il tool, sia per l'avvio di una pianificazione sia per la consultazione dei risultati, dello storico e dei dati di supporto. Il sistema non viene modellato come attore: ogni caso d'uso è sempre attivato da un'azione dell'Operatore.
+
+L'operatore di riferimento è tipicamente una figura tecnica o semi-tecnica, abituata a lavorare con strumenti gestionali e pannelli di monitoraggio. Di conseguenza l'interfaccia deve privilegiare chiarezza, immediatezza e coerenza tra le varie viste, in particolare nelle schermate di configurazione, di monitoraggio e di analisi del piano.
+
 \section{Casi d'uso}
-Per lo studio dei casi di utilizzo del prodotto sono stati creati dei diagrammi.
-I diagrammi dei casi d'uso (in inglese \textit{Use Case Diagram}) sono diagrammi di tipo \gls{uml} dedicati alla descrizione delle funzioni o servizi offerti da un sistema, così come sono percepiti e utilizzati dagli attori che interagiscono col sistema stesso.
-Essendo il progetto finalizzato alla creazione di un tool \gls{TermineSenzaAcronimo} per l'automazione di un processo, le interazioni da parte dell'utilizzatore devono essere ovviamente ridotte allo stretto necessario. Per questo motivo i diagrammi d'uso risultano semplici e in numero ridotto.
+
+Per descrivere le funzionalità del sistema sono stati realizzati i relativi diagrammi dei casi d'uso. Un diagramma dei casi d'uso, in ambito \gls{uml}, permette di rappresentare le funzionalità offerte dal sistema e le interazioni che l'attore può avere con esse.
+
+Nel seguito viene adottata una struttura gerarchica con un solo attore principale, così da evitare casi d'uso puramente automatici o privi di una reale interazione umana. Ogni caso d'uso è infatti descritto come una decisione o un'azione compiuta dall'Operatore.
 
 \begin{figure}[H]
-    \vspace{2em}
     \centering
-    \includegraphics[alt={Testo alternativo dell'immagine}, width=0.75\columnwidth]{img/usecase/scenario-principale.jpeg}
-    \caption{Use Case 0: Scenario principale}
+    \includegraphics[width=0.7\columnwidth]{img/usecase/scenarioPrincipale.png}
+    \caption{Scenario principale di utilizzo del sistema}
     \label{fig:scenario_principale}
 \end{figure}
 
-\begin{usecase}{0}{Scenario principale}
-    \usecaseactors{Sviluppatore applicativi.}
-    \usecasepre{Lo sviluppatore è entrato nel plugin di simulazione all'interno dell'IDE.}
-    \usecasedesc{La finestra di simulazione mette a disposizione i comandi per configurare, registrare o eseguire un test.}
-    \usecasepost{Il sistema è pronto per permettere una nuova interazione.}
-    \label{uc:uc_scenario_principale}
-\end{usecase}
+\subsection{Descrizione associata ai casi d'uso}
 
-\begin{usecase}{1}{Gestione Utente}
-    \usecaseactors{Amministratore, Utente Registrato.}
-    \usecasepre{L'utente deve essere autenticato nel sistema.}
-    \usecasedesc{L'utente può gestire le informazioni del proprio profilo.}
-    \usecasepost{Le modifiche vengono salvate nel sistema.}
-    \usecasealt{Se l'utente non è autenticato, visualizza un messaggio di errore.}
-    \label{uc:uc_casi_uso}
-\end{usecase}
+Ogni caso d'uso è descritto tramite un insieme di informazioni standard, riportate nella tabella seguente.
 
-\begin{usecase}{2}{Creazione Prodotto}
-    \usecaseactors{Amministratore.}
-    \usecasepre{L'amministratore ha effettuato l'accesso al sistema.}
-    \usecasedesc{L'amministratore può aggiungere un nuovo prodotto al catalogo.}
-    \usecasepost{Il nuovo prodotto viene aggiunto con successo.}
-    \usecasealt{Se i campi obbligatori non sono compilati, visualizza un messaggio di errore.}
-    \label{uc:uc_creazione_prodotto}
-\end{usecase}
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{0.28\textwidth}|p{0.64\textwidth}|}
+\hline
+\rowcolor{tableGray}
+\textbf{Campo} & \textbf{Descrizione} \\
+\hline
+Grafico UML & Rappresenta lo scenario del caso d'uso in oggetto. \\
+\hline
+Attore & Rappresenta la persona che interagisce con il sistema per avviare o consultare una funzionalità. \\
+\hline
+Scenario principale & Sequenza ordinaria delle azioni compiute dall'Operatore per completare il caso d'uso. \\
+\hline
+Precondizioni & Condizioni che devono essere vere prima dell'esecuzione del caso d'uso. \\
+\hline
+Postcondizioni & Stato del sistema dopo il completamento corretto del caso d'uso. \\
+\hline
+Scenario alternativo & Flusso valido ma non principale, solitamente legato a un errore o a una deviazione dal comportamento atteso. \\
+\hline
+Inclusioni & Altri casi d'uso richiamati dal caso d'uso corrente. \\
+\hline
+Estensioni & Comportamenti opzionali o condizionati che si attivano in presenza di una specifica condizione. \\
+\hline
+Specializzazioni & Varianti del caso d'uso generale che si escludono a vicenda. \\
+\hline
+Trigger & Evento o azione che avvia il caso d'uso. \\
+\hline
+\end{tabular}
+\caption{Campi utilizzati per descrivere i casi d'uso.}
+\label{tab:campi_casi_uso}
+\end{table}
 
-\section{Tracciamento dei requisiti}
-Da un'attenta analisi dei requisiti e degli use case effettuata sul progetto è stata stilata la tabella che traccia i requisiti in rapporto agli use case.\\
-Sono stati individuati diversi tipi di requisiti e si è quindi fatto utilizzo di un codice identificativo per distinguerli.\\
-Il codice dei requisiti, dove ogni requisito è identificato con il carattere \textbf{R}, è così strutturato:
-\begin{enumerate}
-    \item[\textbf{F}:] Funzionale.
-    \item[\textbf{Q}:] Qualitativo.
-    \item[\textbf{V}:] Di vincolo.
-    \item[\textbf{N}:] Obbligatorio (necessario).
-    \item[\textbf{D}:] Desiderabile.
-    \item[\textbf{Z}:] Opzionale.
-\end{enumerate}
+\subsection{Struttura gerarchica dei casi d'uso}
 
-Nelle tabelle \ref{tab:requisiti_funzionali}, \ref{tab:requisiti_qualitativi} e \ref{tab:requisiti_vincolo} sono riassunti i requisiti e il loro tracciamento con gli use case delineati in fase di analisi.
+Le funzionalità del sistema sono organizzate nelle seguenti macro-aree.
 
-\section{Tabelle dei requisiti}
-\begin{center}
-    \rowcolors{1}{}{tableGray}
-    \begin{longtable}{|p{2.25cm}|p{7.75cm}|p{2.25cm}|}
-    \hline
-    %\rowcolor{hyperColor!5}
-    \multicolumn{1}{|c|}{\textbf{Requisito}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Use Case}}\\
-    \hline 
-    \endfirsthead
-    \rowcolor{white}
-    \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- Continuo della tabella}}\\
-    \hline
-    %\rowcolor{hyperColor!5}
-    \multicolumn{1}{|c|}{\textbf{Requisito}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Use Case}}\\
-    \hline 
-    \endhead
-    \hline
-    \rowcolor{white}
-    \multicolumn{3}{|r|}{{Continua nella prossima pagina...}}\\
-    \hline
-    \endfoot
-    \endlastfoot
-    
-    RFN-1 & L’interfaccia permette di configurare il tipo di sonde del test & UC1 \\
-    \hline
-    \hiderowcolors
-    \caption{Tabella del tracciamento dei requisiti funzionali.}
-    \label{tab:requisiti_funzionali}
-    \end{longtable}
-\end{center}
+\begin{itemize}
+    \item \textbf{UC1 -- Gestione pianificazione}
+    \begin{itemize}
+        \item UC1.1 -- Configurazione pianificazione
+        \item UC1.2 -- Avvio pianificazione
+        \item UC1.3 -- Monitoraggio esecuzione
+        \begin{itemize}
+            \item UC1.3.1 -- Consultazione log
+            \item UC1.3.2 -- Consultazione KPI
+            \item UC1.3.3 -- Consultazione telemetria
+        \end{itemize}
+    \end{itemize}
 
-\begin{center}
-    \rowcolors{1}{}{tableGray}
-    \begin{longtable}{|p{2.25cm}|p{7.75cm}|p{2.25cm}|}
-    \hline
-    %\rowcolor{hyperColor!5}
-    \multicolumn{1}{|c|}{\textbf{Requisito}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Use Case}}\\
-    \hline 
-    \endfirsthead
-    \rowcolor{white}
-    \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- Continuo della tabella}}\\
-    \hline
-    %\rowcolor{hyperColor!5}
-    \multicolumn{1}{|c|}{\textbf{Requisito}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Use Case}}\\
-    \hline 
-    \endhead
-    \hline
-    \rowcolor{white}
-    \multicolumn{3}{|r|}{{Continua nella prossima pagina...}}\\
-    \hline
-    %\caption{Tabella del tracciamento dei requisiti qualitativi.}
-    \endfoot
-    \endlastfoot
-    
-    RQD-1n & Le prestazioni del simulatore hardware deve garantire la giusta esecuzione dei test e non la generazione di falsi negativi & - \\
-    \hline
-    RQD-1n & Le prestazioni del simulatore hardware deve garantire la giusta esecuzione dei test e non la generazione di falsi negativi & - \\
-    \hline
-    RQD-1n & Le prestazioni del simulatore hardware deve garantire la giusta esecuzione dei test e non la generazione di falsi negativi & - \\
-    \hline
-    RQD-1n & Le prestazioni del simulatore hardware deve garantire la giusta esecuzione dei test e non la generazione di falsi negativi & - \\
-    \hline
-    RQD-1n & Le prestazioni del simulatore hardware deve garantire la giusta esecuzione dei test e non la generazione di falsi negativi & - \\
-    \hline
-    RQD-1n & Le prestazioni del simulatore hardware deve garantire la giusta esecuzione dei test e non la generazione di falsi negativi & - \\
-    \hline
-    \hiderowcolors
-    \caption{Tabella del tracciamento dei requisiti qualitativi.}
-    \label{tab:requisiti_qualitativi}
-    \end{longtable}
-\end{center}
+    \item \textbf{UC2 -- Consultazione e analisi risultati}
+    \begin{itemize}
+        \item UC2.1 -- Visualizzazione piano di produzione
+        \begin{itemize}
+            \item UC2.1.1 -- Visualizzazione diagramma di Gantt
+            \item UC2.1.2 -- Visualizzazione task pianificati
+        \end{itemize}
+        \item UC2.2 -- Analisi della qualit\`a del piano
+        \item UC2.3 -- Esportazione piano
+        \begin{itemize}
+            \item UC2.3.1 -- Esportazione piano in JSON
+        \end{itemize}
+    \end{itemize}
 
-\begin{center}
-    \rowcolors{1}{}{tableGray}
-    \begin{longtable}{|p{2.25cm}|p{7.75cm}|p{2.25cm}|}
-    \hline
-    %\rowcolor{hyperColor!5}
-    \multicolumn{1}{|c|}{\textbf{Requisito}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Use Case}}\\
-    \hline 
-    \endfirsthead
-    \rowcolor{white}
-    \multicolumn{3}{c}{{\bfseries \tablename\ \thetable{} -- Continuo della tabella}}\\
-    \hline
-    %\rowcolor{hyperColor!5}
-    \multicolumn{1}{|c|}{\textbf{Requisito}} & \multicolumn{1}{c|}{\textbf{Descrizione}} & \multicolumn{1}{c|}{\textbf{Use Case}}\\
-    \hline 
-    \endhead
-    \hline
-    \rowcolor{white}
-    \multicolumn{3}{|r|}{{Continua nella prossima pagina...}}\\
-    \hline
-    \endfoot
-    \endlastfoot
-    
-    RVO-1 & La libreria per l'esecuzione dei test automatici deve essere riutilizzabile & - \\
-    \hline
-    \hiderowcolors
-    \caption{Tabella del tracciamento dei requisiti di vincolo.}
-    \label{tab:requisiti_vincolo}
-    \end{longtable}
-\end{center}
+    \item \textbf{UC3 -- Gestione storico pianificazioni}
+    \begin{itemize}
+        \item UC3.1 -- Consultazione storico pianificazioni
+        \item UC3.2 -- Consultazione dettaglio esecuzioni storiche
+    \end{itemize}
+
+    \item \textbf{UC4 -- Configurazione avanzata simulazioni}
+    \begin{itemize}
+        \item UC4.1 -- Modifica priorità operative
+        \item UC4.2 -- Stima ATP per nuovo ordine
+    \end{itemize}
+\end{itemize}
+
+\subsection{Dettaglio dei casi d'uso}
+
+\subsubsection{Gestione pianificazione}
+
+\paragraph{UC1 -- Gestione pianificazione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore configura i parametri, avvia la pianificazione e ne monitora l'esecuzione.
+    \item \textbf{Precondizioni:} l'applicazione è disponibile e i dati di input necessari sono presenti.
+    \item \textbf{Postcondizioni:} la pianificazione viene avviata resitituendo i dettagli di avvio.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC1.1 -- Configurazione pianificazione
+        \item UC1.2 -- Avvio pianificazione
+        \item UC1.3 -- Monitoraggio esecuzione
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore desidera eseguire o controllare una pianificazione.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\columnwidth]{img/usecase/uc1.png}
+    \caption{UC1 -- Gestione pianificazione}
+    \label{fig:uc1}
+\end{figure}
+
+\paragraph{UC1.1 -- Configurazione pianificazione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore imposta i parametri della pianificazione, come i dati di ingresso, le regole applicative e le priorità operative da considerare nella simulazione.
+    \item \textbf{Precondizioni:} l'Operatore ha accesso alla schermata di configurazione.
+    \item \textbf{Postcondizioni:} i parametri risultano pronti per l'avvio della pianificazione.
+    \item \textbf{Trigger:} l'Operatore vuole preparare una nuova esecuzione del solver.
+\end{itemize}
+
+\paragraph{UC1.2 -- Avvio pianificazione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore avvia la pianificazione; il sistema elabora i dati, esegue il solver di schedulazione e produce il piano di produzione.
+    \item \textbf{Precondizioni:} la configurazione necessaria è stata completata e i dati di input sono validi.
+    \item \textbf{Postcondizioni:} il piano viene generato e reso disponibile alle viste di consultazione e analisi.
+    \item \textbf{Trigger:} l'Operatore vuole calcolare una nuova soluzione di pianificazione.
+\end{itemize}
+
+\paragraph{UC1.3 -- Monitoraggio esecuzione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} durante l'esecuzione l'Operatore osserva l'avanzamento della pianificazione e controlla le informazioni prodotte dal sistema.
+    \item \textbf{Precondizioni:} una pianificazione è in corso e i relativi dati di esecuzione sono disponibili.
+    \item \textbf{Postcondizioni:} l'Operatore dispone di un quadro aggiornato dello stato della pianificazione.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC1.3.1 -- Consultazione log
+        \item UC1.3.2 -- Consultazione KPI
+        \item UC1.3.3 -- Consultazione telemetria
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore desidera controllare lo stato di esecuzione del solver.
+\end{itemize}
+
+\paragraph{UC1.3.1 -- Consultazione log}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore consulta i messaggi di log generati durante l'esecuzione della pianificazione.
+    \item \textbf{Precondizioni:} una pianificazione è stata avviata o è stata completata.
+    \item \textbf{Postcondizioni:} l'Operatore ha letto i log utili a comprendere l'esito o l'avanzamento dell'esecuzione.
+    \item \textbf{Trigger:} l'Operatore vuole verificare messaggi informativi, di avviso o di errore.
+\end{itemize}
+
+\paragraph{UC1.3.2 -- Consultazione KPI}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore consulta gli indicatori di prestazione calcolati dal sistema, come makespan, lateness e numero di task schedulati.
+    \item \textbf{Precondizioni:} i risultati della pianificazione sono disponibili.
+    \item \textbf{Postcondizioni:} l'Operatore ha analizzato la qualit\`a sintetica della soluzione prodotta.
+    \item \textbf{Trigger:} l'Operatore vuole valutare l'efficienza del piano generato.
+\end{itemize}
+
+\paragraph{UC1.3.3 -- Consultazione telemetria}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore consulta l'andamento temporale dell'esecuzione, includendo gli aggiornamenti progressivi forniti dal solver.
+    \item \textbf{Precondizioni:} il sistema sta eseguendo una pianificazione oppure ha già raccolto la telemetria di una sessione recente.
+    \item \textbf{Postcondizioni:} l'Operatore dispone di un quadro pi\`u dettagliato del comportamento dell'esecuzione.
+    \item \textbf{Trigger:} l'Operatore desidera osservare l'evoluzione interna del processo di calcolo.
+\end{itemize}
+
+\subsubsection{Consultazione e analisi risultati}
+
+\paragraph{UC2 -- Consultazione e analisi risultati}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore apre il piano generato, ne analizza la qualit\`a e, se necessario, lo esporta in un formato compatibile con strumenti esterni.
+    \item \textbf{Precondizioni:} esiste almeno una pianificazione disponibile.
+    \item \textbf{Postcondizioni:} il piano viene consultato, analizzato o esportato.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC2.1 -- Visualizzazione piano di produzione
+        \item UC2.2 -- Analisi della qualit\`a del piano
+        \item UC2.3 -- Esportazione piano
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole esaminare i risultati della schedulazione.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\columnwidth]{img/usecase/uc2.png}
+    \caption{UC2 -- Consultazione e analisi risultati}
+    \label{fig:uc2}
+\end{figure}
+
+\paragraph{UC2.1 -- Visualizzazione piano di produzione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore visualizza il piano di produzione in forma sintetica, in modo da ottenere una rappresentazione comprensibile delle lavorazioni pianificate.
+    \item \textbf{Precondizioni:} una pianificazione è stata generata con successo.
+    \item \textbf{Postcondizioni:} il piano risulta consultabile nelle viste dedicate.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC2.1.1 -- Visualizzazione diagramma di Gantt
+        \item UC2.1.2 -- Visualizzazione task pianificati
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore desidera esaminare il piano ottenuto dal solver.
+\end{itemize}
+
+\paragraph{UC2.1.1 -- Visualizzazione diagramma di Gantt}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore consulta il diagramma di Gantt per visualizzare la distribuzione temporale delle attività sulle risorse.
+    \item \textbf{Precondizioni:} il piano di produzione è disponibile.
+    \item \textbf{Postcondizioni:} l'Operatore ha valutato la sequenza temporale delle lavorazioni.
+    \item \textbf{Trigger:} l'Operatore vuole analizzare graficamente la pianificazione.
+\end{itemize}
+
+\paragraph{UC2.1.2 -- Visualizzazione task pianificati}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore consulta l'elenco dei task pianificati con i relativi attributi, come macchina assegnata, tempi e quantit\`a.
+    \item \textbf{Precondizioni:} il piano di produzione è stato calcolato.
+    \item \textbf{Postcondizioni:} l'Operatore ha consultato i task schedulati dal solver.
+    \item \textbf{Trigger:} l'Operatore vuole verificare nel dettaglio il contenuto del piano.
+\end{itemize}
+
+\paragraph{UC2.2 -- Analisi della qualit\`a del piano}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore confronta gli indicatori della pianificazione per valutarne la qualit\`a complessiva e verificare la presenza di criticit\`a.
+    \item \textbf{Precondizioni:} un piano è stato generato ed è disponibile la relativa reportistica.
+    \item \textbf{Postcondizioni:} l'Operatore ha una valutazione sintetica della bont\`a della soluzione.
+    \item \textbf{Trigger:} l'Operatore vuole capire se il piano prodotto sia soddisfacente rispetto ai vincoli e agli obiettivi.
+\end{itemize}
+
+\paragraph{UC2.3 -- Esportazione piano}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore esporta il piano di produzione per renderlo disponibile a strumenti o processi esterni.
+    \item \textbf{Precondizioni:} il piano di produzione è disponibile.
+    \item \textbf{Postcondizioni:} il piano viene salvato in un formato esportabile.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC2.3.1 -- Esportazione piano in JSON
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole riutilizzare i dati della pianificazione altrove.
+\end{itemize}
+
+\paragraph{UC2.3.1 -- Esportazione piano in JSON}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore esporta il piano in formato JSON, così da poterlo leggere con altri strumenti o integrarlo in flussi esterni.
+    \item \textbf{Precondizioni:} il piano è stato generato con successo.
+    \item \textbf{Postcondizioni:} il file JSON risulta disponibile all'Operatore.
+    \item \textbf{Trigger:} l'Operatore vuole ottenere una rappresentazione interoperabile del piano.
+\end{itemize}
+
+\subsubsection{Gestione storico pianificazioni}
+
+\paragraph{UC3 -- Gestione storico pianificazioni}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore consulta le pianificazioni precedenti e ne analizza i dettagli esecutivi.
+    \item \textbf{Precondizioni:} esistono esecuzioni salvate nello storico locale.
+    \item \textbf{Postcondizioni:} l'Operatore ha consultato i dati storici della pianificazione.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC3.1 -- Consultazione storico pianificazioni
+        \item UC3.2 -- Consultazione dettaglio esecuzioni storiche
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole confrontare esecuzioni passate o recuperare informazioni pregresse.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\columnwidth]{img/usecase/uc3.png}
+    \caption{UC3 -- Gestione storico pianificazioni}
+    \label{fig:uc3}
+\end{figure}
+
+\paragraph{UC3.1 -- Consultazione storico pianificazioni}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore apre l'elenco delle pianificazioni precedenti e ne consulta gli elementi principali.
+    \item \textbf{Precondizioni:} lo storico locale contiene almeno una pianificazione memorizzata.
+    \item \textbf{Postcondizioni:} l'Operatore ha consultato l'elenco storico.
+    \item \textbf{Trigger:} l'Operatore vuole accedere a una pianificazione già eseguita.
+\end{itemize}
+
+\paragraph{UC3.2 -- Consultazione dettaglio esecuzioni storiche}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore apre il dettaglio di una specifica esecuzione storica per visualizzarne esito, KPI e informazioni di supporto.
+    \item \textbf{Precondizioni:} esiste almeno una pianificazione storica selezionabile.
+    \item \textbf{Postcondizioni:} il dettaglio della specifica esecuzione è stato consultato.
+    \item \textbf{Trigger:} l'Operatore vuole approfondire una singola esecuzione dello storico.
+\end{itemize}
+
+\subsubsection{Configurazione avanzata simulazioni}
+
+\paragraph{UC4 -- Configurazione avanzata simulazioni}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore modifica alcuni parametri avanzati che influenzano la simulazione, come le priorità operative o la stima della disponibilità di nuovi ordini.
+    \item \textbf{Precondizioni:} l'Operatore dispone dell'accesso alle impostazioni avanzate.
+    \item \textbf{Postcondizioni:} i parametri avanzati vengono aggiornati e utilizzati nelle elaborazioni successive.
+    \item \textbf{Inclusioni:}
+    \begin{itemize}
+        \item UC4.1 -- Modifica priorità operative
+        \item UC4.2 -- Stima ATP per nuovo ordine
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole raffinare il comportamento della pianificazione.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\columnwidth]{img/usecase/uc4.png}
+    \caption{UC4 -- Configurazione avanzata simulazioni}
+    \label{fig:uc4}
+\end{figure}
+
+\paragraph{UC4.1 -- Modifica priorità operative}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore modifica le priorità operative da utilizzare nella logica di pianificazione.
+    \item \textbf{Precondizioni:} il sistema consente la modifica dei parametri di priorità.
+    \item \textbf{Postcondizioni:} le nuove priorità risultano pronte per la pianificazione successiva.
+    \item \textbf{Trigger:} l'Operatore desidera ottenere una pianificazione pi\`u aderente alle necessit\`a operative.
+\end{itemize}
+
+\paragraph{UC4.2 -- Stima ATP per nuovo ordine}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:} l'Operatore richiede una stima di ATP (Available To Promise) per valutare in quale intervallo temporale un nuovo ordine possa essere inserito nel piano.
+    \item \textbf{Precondizioni:} il piano disponibile contiene informazioni sufficienti per eseguire la stima.
+    \item \textbf{Postcondizioni:} l'Operatore ottiene una stima utile alla valutazione del nuovo ordine.
+    \item \textbf{Trigger:} l'Operatore vuole verificare la possibile collocazione di un nuovo ordine.
+\end{itemize}
 
 \newpage
+
+\section{Tracciamento dei requisiti}
+
+A partire dall'analisi dei casi d'uso è stato definito un insieme di requisiti funzionali, qualitativi e di vincolo. Il codice identificativo dei requisiti segue la notazione riportata di seguito.
+
+\begin{itemize}
+    \item \textbf{F} -- Requisito funzionale
+    \item \textbf{Q} -- Requisito qualitativo
+    \item \textbf{V} -- Requisito di vincolo
+    \item \textbf{N} -- Obbligatorio
+    \item \textbf{D} -- Desiderabile
+    \item \textbf{Z} -- Facoltativo
+\end{itemize}
+
+Tutti i requisiti riportati in questa sezione sono classificati come obbligatori; per questo motivo il codice termina con la lettera \textbf{N}.
+
+\section{Tabelle dei requisiti}
+
+\subsection{Requisiti funzionali}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{2.1cm}|p{6.9cm}|p{2.0cm}|p{2.0cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Use Case}} &
+\multicolumn{1}{c|}{\textbf{Necessità}} \\
+\hline
+\endfirsthead
+
+\hline
+\multicolumn{4}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Use Case}} &
+\multicolumn{1}{c|}{\textbf{Necessità}} \\
+\hline
+\endhead
+
+RFN-1  & Configurazione dei parametri di pianificazione & UC1.1 & N \\
+\hline
+RFN-2  & Avvio di una pianificazione & UC1.2 & N \\
+\hline
+RFN-3  & Monitoraggio dello stato di esecuzione & UC1.3 & N \\
+\hline
+RFN-4  & Consultazione log di esecuzione & UC1.3.1 & N \\
+\hline
+RFN-5  & Consultazione KPI della pianificazione & UC1.3.2 & N \\
+\hline
+RFN-6  & Consultazione telemetria di esecuzione & UC1.3.3 & N \\
+\hline
+RFN-7  & Visualizzazione del piano di produzione & UC2.1 & N \\
+\hline
+RFN-8  & Visualizzazione del diagramma di Gantt & UC2.1.1 & N \\
+\hline
+RFN-9  & Visualizzazione dei task pianificati & UC2.1.2 & N \\
+\hline
+RFN-10 & Esportazione del piano di produzione & UC2.3 & N \\
+\hline
+RFN-11 & Consultazione dello storico delle pianificazioni & UC3.1 & N \\
+\hline
+RFN-12 & Analisi della qualit\`a del piano & UC2.2 & N \\
+\hline
+RFN-13 & Modifica delle priorit\`a operative & UC4.1 & N \\
+\hline
+RFN-14 & Stima ATP per nuovi ordini & UC4.2 & N \\
+\hline
+
+\caption{Tabella del tracciamento dei requisiti funzionali.}
+\label{tab:requisiti_funzionali}
+\end{longtable}
+\end{center}
+
+\subsection{Requisiti qualitativi}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{2.1cm}|p{6.9cm}|p{2.0cm}|p{2.0cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Use Case}} &
+\multicolumn{1}{c|}{\textbf{Necessità}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{4}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+RQN-1 & L'interfaccia deve risultare intuitiva e utilizzabile dagli operatori & UC1, UC2, UC3, UC4 & N \\
+\hline
+RQN-2 & Il sistema deve garantire tempi di risposta adeguati & UC2.1, UC2.2 & N \\
+\hline
+RQN-3 & Le informazioni di esecuzione devono essere aggiornate in modo continuo & UC1.3 & N \\
+\hline
+RQN-4 & La pianificazione deve rispettare i vincoli del modello di schedulazione & UC1.2 & N \\
+\hline
+RQN-5 & I dati esportati devono essere compatibili con strumenti esterni & UC2.3 & N \\
+\hline
+RQN-6 & Le esecuzioni devono essere tracciabili nello storico locale & UC3.1, UC3.2 & N \\
+\hline
+
+\caption{Tabella del tracciamento dei requisiti qualitativi.}
+\label{tab:requisiti_qualitativi}
+\end{longtable}
+\end{center}
+
+\subsection{Requisiti di vincolo}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{2.1cm}|p{6.9cm}|p{2.0cm}|p{2.0cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Use Case}} &
+\multicolumn{1}{c|}{\textbf{Necessità}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{4}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+RVN-1 & Il sistema deve essere sviluppato in linguaggio C++ & - & N \\
+\hline
+RVN-2 & L'interfaccia grafica deve essere realizzata con Qt6 & - & N \\
+\hline
+RVN-3 & Il solver di pianificazione deve utilizzare Google OR-Tools & UC1.2 & N \\
+\hline
+RVN-4 & L'esportazione dei dati deve avvenire in formato JSON & UC2.3 & N \\
+\hline
+RVN-5 & Lo storico locale deve essere persistito tramite SQLite & UC3.1, UC3.2 & N \\
+\hline
+
+\caption{Tabella del tracciamento dei requisiti di vincolo.}
+\label{tab:requisiti_vincolo}
+\end{longtable}
+\end{center}
