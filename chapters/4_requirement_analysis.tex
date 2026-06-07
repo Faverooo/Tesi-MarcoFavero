@@ -13,11 +13,11 @@ L'operatore di riferimento è tipicamente una figura tecnica o semi-tecnica, abi
 
 Per descrivere le funzionalità del sistema sono stati realizzati i relativi diagrammi dei casi d'uso. Un diagramma dei casi d'uso, in ambito \gls{uml}, permette di rappresentare le funzionalità offerte dal sistema e le interazioni che l'attore può avere con esse.
 
-Nel seguito viene adottata una struttura gerarchica con un solo attore principale, così da evitare casi d'uso puramente automatici o privi di una reale interazione umana. Ogni caso d'uso è infatti descritto come una decisione o un'azione compiuta dall'Operatore.
+Nel seguito ogni caso d'uso corrisponde a un'azione distinta dell'Operatore. Le inclusioni (\textit{<<include>>}) sono utilizzate per raggruppare le sotto-attività obbligatorie e omogenee di uno stesso caso d'uso; le estensioni (\textit{<<extend>>}) descrivono esclusivamente scenari di errore o di deviazione dal flusso atteso; le specializzazioni modellano varianti alternative e mutuamente esclusive.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\columnwidth]{img/usecase/scenarioPrincipale.png}
+    \includegraphics[width=0.65\columnwidth]{img/usecase/scenarioPrincipale.png}
     \caption{Scenario principale di utilizzo del sistema}
     \label{fig:scenario_principale}
 \end{figure}
@@ -38,19 +38,19 @@ Grafico UML & Rappresenta lo scenario del caso d'uso in oggetto. \\
 \hline
 Attore & Rappresenta la persona che interagisce con il sistema per avviare o consultare una funzionalità. \\
 \hline
-Scenario principale & Sequenza ordinaria delle azioni compiute dall'Operatore per completare il caso d'uso. \\
+Scenario principale & Sequenza ordinata delle azioni compiute dall'Operatore per completare il caso d'uso. \\
 \hline
 Precondizioni & Condizioni che devono essere vere prima dell'esecuzione del caso d'uso. \\
 \hline
 Postcondizioni & Stato del sistema dopo il completamento corretto del caso d'uso. \\
 \hline
-Scenario alternativo & Flusso valido ma non principale, solitamente legato a un errore o a una deviazione dal comportamento atteso. \\
+Scenario alternativo & Flusso valido ma non principale, legato a un errore o a una deviazione dal comportamento atteso. \\
 \hline
-Inclusioni & Altri casi d'uso richiamati dal caso d'uso corrente. \\
+Inclusioni & Casi d'uso richiamati in modo obbligatorio dal caso d'uso corrente (\textit{<<include>>}). \\
 \hline
-Estensioni & Comportamenti opzionali o condizionati che si attivano in presenza di una specifica condizione. \\
+Estensioni & Comportamenti condizionati, attivati solo al verificarsi di una situazione di errore (\textit{<<extend>>}). \\
 \hline
-Specializzazioni & Varianti del caso d'uso generale che si escludono a vicenda. \\
+Specializzazioni & Varianti mutuamente esclusive del caso d'uso generale. \\
 \hline
 Trigger & Evento o azione che avvia il caso d'uso. \\
 \hline
@@ -61,301 +61,547 @@ Trigger & Evento o azione che avvia il caso d'uso. \\
 
 \subsection{Struttura gerarchica dei casi d'uso}
 
-Le funzionalità del sistema sono organizzate nelle seguenti macro-aree.
+Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
 
 \begin{itemize}
-    \item \textbf{UC1 -- Gestione pianificazione}
+    \item \textbf{UC1 -- Configurazione pianificazione}
     \begin{itemize}
-        \item UC1.1 -- Configurazione pianificazione
-        \item UC1.2 -- Avvio pianificazione
-        \item UC1.3 -- Monitoraggio esecuzione
-        \begin{itemize}
-            \item UC1.3.1 -- Consultazione log
-            \item UC1.3.2 -- Consultazione KPI
-            \item UC1.3.3 -- Consultazione telemetria
-        \end{itemize}
+        \item UC1.1 -- Inserimento data di inizio pianificazione
+        \item UC1.2 -- Inserimento timeout del solver
+        \item UC1.3 -- Selezione strategia di risoluzione
     \end{itemize}
 
-    \item \textbf{UC2 -- Consultazione e analisi risultati}
+    \item \textbf{UC2 -- Avvio pianificazione}
+
+    \item \textbf{UC3 -- Monitoraggio esecuzione}
     \begin{itemize}
-        \item UC2.1 -- Visualizzazione piano di produzione
-        \begin{itemize}
-            \item UC2.1.1 -- Visualizzazione diagramma di Gantt
-            \item UC2.1.2 -- Visualizzazione task pianificati
-        \end{itemize}
-        \item UC2.2 -- Analisi della qualit\`a del piano
-        \item UC2.3 -- Esportazione piano
-        \begin{itemize}
-            \item UC2.3.1 -- Esportazione piano in JSON
-        \end{itemize}
+        \item UC3.1 -- Consultazione log di esecuzione
+        \item UC3.2 -- Consultazione KPI in tempo reale
+        \item UC3.3 -- Consultazione telemetria del solver
     \end{itemize}
 
-    \item \textbf{UC3 -- Gestione storico pianificazioni}
+    \item \textbf{UC4 -- Consultazione risultati}
     \begin{itemize}
-        \item UC3.1 -- Consultazione storico pianificazioni
-        \item UC3.2 -- Consultazione dettaglio esecuzioni storiche
+        \item UC4.1 -- Visualizzazione diagramma di Gantt
+        \item UC4.2 -- Visualizzazione task pianificati
+        \item UC4.3 -- Analisi qualità del piano
     \end{itemize}
 
-    \item \textbf{UC4 -- Configurazione avanzata simulazioni}
+    \item \textbf{UC5 -- Esportazione piano in formato JSON}
+
+    \item \textbf{UC6 -- Gestione storico pianificazioni}
     \begin{itemize}
-        \item UC4.1 -- Modifica priorità operative
-        \item UC4.2 -- Stima ATP per nuovo ordine
+        \item UC6.1 -- Consultazione elenco storico pianificazioni
+        \item UC6.2 -- Consultazione dettaglio esecuzione storica
     \end{itemize}
+
+    \item \textbf{UC7 -- Modifica priorità operative}
+
+    \item \textbf{UC8 -- Stima ATP per nuovo ordine}
 \end{itemize}
 
 \subsection{Dettaglio dei casi d'uso}
 
-\subsubsection{Gestione pianificazione}
+\subsubsection{Configurazione pianificazione}
 
-\paragraph{UC1 -- Gestione pianificazione}
+\paragraph{UC1 -- Configurazione pianificazione}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore configura i parametri, avvia la pianificazione e ne monitora l'esecuzione.
-    \item \textbf{Precondizioni:} l'applicazione è disponibile e i dati di input necessari sono presenti.
-    \item \textbf{Postcondizioni:} la pianificazione viene avviata resitituendo i dettagli di avvio.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore imposta la data di inizio della pianificazione $\rightarrow$ UC1.1.
+        \item L'Operatore configura il timeout massimo del solver $\rightarrow$ UC1.2.
+        \item L'Operatore seleziona la strategia di risoluzione da applicare $\rightarrow$ UC1.3.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item i dati di produzione necessari sono presenti nel database ERP.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item i parametri risultano pronti per l'avvio della pianificazione.
+    \end{itemize}
     \item \textbf{Inclusioni:}
     \begin{itemize}
-        \item UC1.1 -- Configurazione pianificazione
-        \item UC1.2 -- Avvio pianificazione
-        \item UC1.3 -- Monitoraggio esecuzione
+        \item UC1.1 -- Inserimento data di inizio pianificazione.
+        \item UC1.2 -- Inserimento timeout del solver.
+        \item UC1.3 -- Selezione strategia di risoluzione.
     \end{itemize}
-    \item \textbf{Trigger:} l'Operatore desidera eseguire o controllare una pianificazione.
-\end{itemize}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\columnwidth]{img/usecase/uc1.png}
-    \caption{UC1 -- Gestione pianificazione}
-    \label{fig:uc1}
-\end{figure}
-
-\paragraph{UC1.1 -- Configurazione pianificazione}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore imposta i parametri della pianificazione, come i dati di ingresso, le regole applicative e le priorità operative da considerare nella simulazione.
-    \item \textbf{Precondizioni:} l'Operatore ha accesso alla schermata di configurazione.
-    \item \textbf{Postcondizioni:} i parametri risultano pronti per l'avvio della pianificazione.
     \item \textbf{Trigger:} l'Operatore vuole preparare una nuova esecuzione del solver.
 \end{itemize}
 
-\paragraph{UC1.2 -- Avvio pianificazione}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\columnwidth]{img/usecase/uc1.png}
+    \caption{UC1 -- Configurazione pianificazione}
+    \label{fig:uc1}
+\end{figure}
+
+\paragraph{UC1.1 -- Inserimento data di inizio pianificazione}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore avvia la pianificazione; il sistema elabora i dati, esegue il solver di schedulazione e produce il piano di produzione.
-    \item \textbf{Precondizioni:} la configurazione necessaria è stata completata e i dati di input sono validi.
-    \item \textbf{Postcondizioni:} il piano viene generato e reso disponibile alle viste di consultazione e analisi.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede al campo della data di inizio.
+        \item L'Operatore seleziona o inserisce la data a partire dalla quale il solver deve collocare le attività.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item l'Operatore si trova nella schermata di configurazione $\rightarrow$ UC1.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item la data di inizio risulta impostata nel form di configurazione.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole definire il punto temporale di partenza della pianificazione.
+\end{itemize}
+
+\paragraph{UC1.2 -- Inserimento timeout del solver}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede al campo del timeout.
+        \item L'Operatore inserisce il numero di secondi entro cui il solver deve produrre una soluzione.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item l'Operatore si trova nella schermata di configurazione $\rightarrow$ UC1.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il timeout risulta impostato nel form di configurazione.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole definire il tempo massimo consentito alla fase di ottimizzazione.
+\end{itemize}
+
+\paragraph{UC1.3 -- Selezione strategia di risoluzione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede al selettore della strategia di risoluzione.
+        \item L'Operatore sceglie la strategia CP-SAT da applicare al problema di schedulazione.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item l'Operatore si trova nella schermata di configurazione $\rightarrow$ UC1.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item la strategia risulta selezionata nel form di configurazione.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole scegliere il metodo di risoluzione più adatto al contesto corrente.
+\end{itemize}
+
+\subsubsection{Avvio pianificazione}
+
+\paragraph{UC2 -- Avvio pianificazione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore preme il pulsante di avvio.
+        \item Il sistema carica i dati di produzione dal database ERP.
+        \item Il sistema costruisce il modello CP-SAT e lo sottopone al solver.
+        \item Il solver produce il piano di produzione.
+        \item Il sistema rende il piano disponibile per la consultazione e registra l'esecuzione nello storico locale.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item la configurazione è stata completata $\rightarrow$ UC1.
+        \item il database ERP è accessibile e contiene dati di produzione validi.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il piano è stato generato e reso disponibile alle viste di consultazione.
+        \item l'esecuzione è registrata nello storico locale con esito positivo.
+    \end{itemize}
+    \item \textbf{Scenario alternativo:} il solver restituisce una soluzione non ammissibile (stato \texttt{INFEASIBLE}) oppure viene interrotto per timeout senza aver trovato alcuna soluzione; il sistema registra l'errore nei log, aggiorna lo storico con esito negativo e non produce alcun piano.
     \item \textbf{Trigger:} l'Operatore vuole calcolare una nuova soluzione di pianificazione.
 \end{itemize}
 
-\paragraph{UC1.3 -- Monitoraggio esecuzione}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\columnwidth]{img/usecase/uc2.png}
+    \caption{UC2 -- Avvio pianificazione}
+    \label{fig:uc2}
+\end{figure}
+
+\subsubsection{Monitoraggio esecuzione}
+
+\paragraph{UC3 -- Monitoraggio esecuzione}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} durante l'esecuzione l'Operatore osserva l'avanzamento della pianificazione e controlla le informazioni prodotte dal sistema.
-    \item \textbf{Precondizioni:} una pianificazione è in corso e i relativi dati di esecuzione sono disponibili.
-    \item \textbf{Postcondizioni:} l'Operatore dispone di un quadro aggiornato dello stato della pianificazione.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla vista di monitoraggio.
+        \item L'Operatore consulta i messaggi di log generati dal solver $\rightarrow$ UC3.1.
+        \item L'Operatore consulta gli indicatori KPI aggiornati in tempo reale $\rightarrow$ UC3.2.
+        \item L'Operatore consulta la telemetria dell'esecuzione $\rightarrow$ UC3.3.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item una pianificazione è in corso oppure i relativi dati di esecuzione sono disponibili $\rightarrow$ UC2.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore dispone di un quadro aggiornato dello stato e dell'avanzamento della pianificazione.
+    \end{itemize}
     \item \textbf{Inclusioni:}
     \begin{itemize}
-        \item UC1.3.1 -- Consultazione log
-        \item UC1.3.2 -- Consultazione KPI
-        \item UC1.3.3 -- Consultazione telemetria
+        \item UC3.1 -- Consultazione log di esecuzione.
+        \item UC3.2 -- Consultazione KPI in tempo reale.
+        \item UC3.3 -- Consultazione telemetria del solver.
     \end{itemize}
     \item \textbf{Trigger:} l'Operatore desidera controllare lo stato di esecuzione del solver.
 \end{itemize}
 
-\paragraph{UC1.3.1 -- Consultazione log}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\columnwidth]{img/usecase/uc3.png}
+    \caption{UC3 -- Monitoraggio esecuzione}
+    \label{fig:uc3}
+\end{figure}
+
+\paragraph{UC3.1 -- Consultazione log di esecuzione}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore consulta i messaggi di log generati durante l'esecuzione della pianificazione.
-    \item \textbf{Precondizioni:} una pianificazione è stata avviata o è stata completata.
-    \item \textbf{Postcondizioni:} l'Operatore ha letto i log utili a comprendere l'esito o l'avanzamento dell'esecuzione.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede al pannello dei log.
+        \item L'Operatore legge i messaggi informativi, di avviso o di errore generati durante l'esecuzione.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item una pianificazione è stata avviata o è stata completata.
+        \item l'Operatore si trova nella vista di monitoraggio $\rightarrow$ UC3.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha letto i log utili a comprendere l'esito o l'avanzamento dell'esecuzione.
+    \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole verificare messaggi informativi, di avviso o di errore.
 \end{itemize}
 
-\paragraph{UC1.3.2 -- Consultazione KPI}
+\paragraph{UC3.2 -- Consultazione KPI in tempo reale}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore consulta gli indicatori di prestazione calcolati dal sistema, come makespan, lateness e numero di task schedulati.
-    \item \textbf{Precondizioni:} i risultati della pianificazione sono disponibili.
-    \item \textbf{Postcondizioni:} l'Operatore ha analizzato la qualit\`a sintetica della soluzione prodotta.
-    \item \textbf{Trigger:} l'Operatore vuole valutare l'efficienza del piano generato.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla sezione KPI.
+        \item L'Operatore analizza gli indicatori di prestazione aggiornati: makespan, lateness totale e numero di task schedulati.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il solver ha prodotto almeno un aggiornamento intermedio.
+        \item l'Operatore si trova nella vista di monitoraggio $\rightarrow$ UC3.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha valutato gli indicatori di qualità della soluzione corrente.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole valutare l'efficienza del piano in corso di ottimizzazione.
 \end{itemize}
 
-\paragraph{UC1.3.3 -- Consultazione telemetria}
+\paragraph{UC3.3 -- Consultazione telemetria del solver}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore consulta l'andamento temporale dell'esecuzione, includendo gli aggiornamenti progressivi forniti dal solver.
-    \item \textbf{Precondizioni:} il sistema sta eseguendo una pianificazione oppure ha già raccolto la telemetria di una sessione recente.
-    \item \textbf{Postcondizioni:} l'Operatore dispone di un quadro pi\`u dettagliato del comportamento dell'esecuzione.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla sezione telemetria.
+        \item L'Operatore osserva l'andamento temporale dell'esecuzione, inclusi i valori di incumbent, bound e gap forniti dal solver.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il sistema sta eseguendo una pianificazione oppure ha già raccolto la telemetria di una sessione recente.
+        \item l'Operatore si trova nella vista di monitoraggio $\rightarrow$ UC3.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore dispone di un quadro dettagliato del comportamento interno del solver.
+    \end{itemize}
     \item \textbf{Trigger:} l'Operatore desidera osservare l'evoluzione interna del processo di calcolo.
 \end{itemize}
 
-\subsubsection{Consultazione e analisi risultati}
+\subsubsection{Consultazione risultati}
 
-\paragraph{UC2 -- Consultazione e analisi risultati}
+\paragraph{UC4 -- Consultazione risultati}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore apre il piano generato, ne analizza la qualit\`a e, se necessario, lo esporta in un formato compatibile con strumenti esterni.
-    \item \textbf{Precondizioni:} esiste almeno una pianificazione disponibile.
-    \item \textbf{Postcondizioni:} il piano viene consultato, analizzato o esportato.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla vista dei risultati.
+        \item L'Operatore visualizza il diagramma di Gantt del piano $\rightarrow$ UC4.1.
+        \item L'Operatore consulta l'elenco dei task pianificati $\rightarrow$ UC4.2.
+        \item L'Operatore analizza la qualità del piano ottenuto $\rightarrow$ UC4.3.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item la pianificazione è stata completata con successo e ha prodotto un piano $\rightarrow$ UC2.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il piano è stato consultato nelle sue rappresentazioni principali.
+    \end{itemize}
     \item \textbf{Inclusioni:}
     \begin{itemize}
-        \item UC2.1 -- Visualizzazione piano di produzione
-        \item UC2.2 -- Analisi della qualit\`a del piano
-        \item UC2.3 -- Esportazione piano
+        \item UC4.1 -- Visualizzazione diagramma di Gantt.
+        \item UC4.2 -- Visualizzazione task pianificati.
+        \item UC4.3 -- Analisi qualità del piano.
     \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole esaminare i risultati della schedulazione.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\columnwidth]{img/usecase/uc2.png}
-    \caption{UC2 -- Consultazione e analisi risultati}
-    \label{fig:uc2}
+    \includegraphics[width=0.85\columnwidth]{img/usecase/uc4.png}
+    \caption{UC4 -- Consultazione risultati}
+    \label{fig:uc4}
 \end{figure}
 
-\paragraph{UC2.1 -- Visualizzazione piano di produzione}
+\paragraph{UC4.1 -- Visualizzazione diagramma di Gantt}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore visualizza il piano di produzione in forma sintetica, in modo da ottenere una rappresentazione comprensibile delle lavorazioni pianificate.
-    \item \textbf{Precondizioni:} una pianificazione è stata generata con successo.
-    \item \textbf{Postcondizioni:} il piano risulta consultabile nelle viste dedicate.
-    \item \textbf{Inclusioni:}
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore apre il pannello del diagramma di Gantt.
+        \item L'Operatore analizza la distribuzione temporale dei task sulle macchine.
+        \item L'Operatore legge le informazioni di dettaglio tramite i tooltip dei blocchi grafici.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
     \begin{itemize}
-        \item UC2.1.1 -- Visualizzazione diagramma di Gantt
-        \item UC2.1.2 -- Visualizzazione task pianificati
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il piano di produzione è disponibile.
+        \item l'Operatore si trova nella vista dei risultati $\rightarrow$ UC4.
     \end{itemize}
-    \item \textbf{Trigger:} l'Operatore desidera esaminare il piano ottenuto dal solver.
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha valutato la sequenza temporale delle lavorazioni per macchina.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole analizzare graficamente la distribuzione delle attività sulle risorse.
 \end{itemize}
 
-\paragraph{UC2.1.1 -- Visualizzazione diagramma di Gantt}
+\paragraph{UC4.2 -- Visualizzazione task pianificati}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore consulta il diagramma di Gantt per visualizzare la distribuzione temporale delle attività sulle risorse.
-    \item \textbf{Precondizioni:} il piano di produzione è disponibile.
-    \item \textbf{Postcondizioni:} l'Operatore ha valutato la sequenza temporale delle lavorazioni.
-    \item \textbf{Trigger:} l'Operatore vuole analizzare graficamente la pianificazione.
-\end{itemize}
-
-\paragraph{UC2.1.2 -- Visualizzazione task pianificati}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore consulta l'elenco dei task pianificati con i relativi attributi, come macchina assegnata, tempi e quantit\`a.
-    \item \textbf{Precondizioni:} il piano di produzione è stato calcolato.
-    \item \textbf{Postcondizioni:} l'Operatore ha consultato i task schedulati dal solver.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore apre la lista dei task pianificati.
+        \item L'Operatore consulta gli attributi di ciascun task: macchina assegnata, orari di inizio e fine, quantità.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il piano di produzione è stato calcolato.
+        \item l'Operatore si trova nella vista dei risultati $\rightarrow$ UC4.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha consultato i task schedulati dal solver.
+    \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole verificare nel dettaglio il contenuto del piano.
 \end{itemize}
 
-\paragraph{UC2.2 -- Analisi della qualit\`a del piano}
+\paragraph{UC4.3 -- Analisi qualità del piano}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore confronta gli indicatori della pianificazione per valutarne la qualit\`a complessiva e verificare la presenza di criticit\`a.
-    \item \textbf{Precondizioni:} un piano è stato generato ed è disponibile la relativa reportistica.
-    \item \textbf{Postcondizioni:} l'Operatore ha una valutazione sintetica della bont\`a della soluzione.
-    \item \textbf{Trigger:} l'Operatore vuole capire se il piano prodotto sia soddisfacente rispetto ai vincoli e agli obiettivi.
-\end{itemize}
-
-\paragraph{UC2.3 -- Esportazione piano}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore esporta il piano di produzione per renderlo disponibile a strumenti o processi esterni.
-    \item \textbf{Precondizioni:} il piano di produzione è disponibile.
-    \item \textbf{Postcondizioni:} il piano viene salvato in un formato esportabile.
-    \item \textbf{Inclusioni:}
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla sezione di analisi qualità.
+        \item L'Operatore esamina gli indicatori sintetici: makespan, lateness totale e numero di job in ritardo.
+        \item L'Operatore verifica l'eventuale presenza di avvisi di validazione generati dal solver.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
     \begin{itemize}
-        \item UC2.3.1 -- Esportazione piano in JSON
+        \item l'applicazione è disponibile e raggiungibile.
+        \item un piano è stato generato ed è disponibile la relativa reportistica.
+        \item l'Operatore si trova nella vista dei risultati $\rightarrow$ UC4.
     \end{itemize}
-    \item \textbf{Trigger:} l'Operatore vuole riutilizzare i dati della pianificazione altrove.
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha una valutazione sintetica della bontà della soluzione prodotta.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole valutare se il piano prodotto sia soddisfacente rispetto ai vincoli e agli obiettivi.
 \end{itemize}
 
-\paragraph{UC2.3.1 -- Esportazione piano in JSON}
+\subsubsection{Esportazione piano in formato JSON}
+
+\paragraph{UC5 -- Esportazione piano in formato JSON}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore esporta il piano in formato JSON, così da poterlo leggere con altri strumenti o integrarlo in flussi esterni.
-    \item \textbf{Precondizioni:} il piano è stato generato con successo.
-    \item \textbf{Postcondizioni:} il file JSON risulta disponibile all'Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla funzione di esportazione.
+        \item L'Operatore seleziona il percorso di destinazione del file.
+        \item Il sistema serializza il piano in formato JSON.
+        \item Il file viene salvato su disco e il sistema notifica il completamento.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il piano di produzione è disponibile $\rightarrow$ UC2.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il file JSON risulta disponibile all'Operatore nel percorso selezionato.
+    \end{itemize}
+    \item \textbf{Scenario alternativo:} la scrittura su disco fallisce per permessi insufficienti o spazio esaurito; il sistema notifica l'errore all'Operatore e il file non viene creato.
     \item \textbf{Trigger:} l'Operatore vuole ottenere una rappresentazione interoperabile del piano.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\columnwidth]{img/usecase/uc5.png}
+    \caption{UC5 -- Esportazione piano in formato JSON}
+    \label{fig:uc5}
+\end{figure}
+
 \subsubsection{Gestione storico pianificazioni}
 
-\paragraph{UC3 -- Gestione storico pianificazioni}
+\paragraph{UC6 -- Gestione storico pianificazioni}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore consulta le pianificazioni precedenti e ne analizza i dettagli esecutivi.
-    \item \textbf{Precondizioni:} esistono esecuzioni salvate nello storico locale.
-    \item \textbf{Postcondizioni:} l'Operatore ha consultato i dati storici della pianificazione.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore apre la sezione storico e consulta l'elenco delle pianificazioni precedenti $\rightarrow$ UC6.1.
+        \item L'Operatore seleziona una pianificazione dall'elenco e ne consulta il dettaglio $\rightarrow$ UC6.2.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item lo storico locale contiene almeno una pianificazione memorizzata.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha consultato i dati storici delle pianificazioni precedenti.
+    \end{itemize}
     \item \textbf{Inclusioni:}
     \begin{itemize}
-        \item UC3.1 -- Consultazione storico pianificazioni
-        \item UC3.2 -- Consultazione dettaglio esecuzioni storiche
+        \item UC6.1 -- Consultazione elenco storico pianificazioni.
+        \item UC6.2 -- Consultazione dettaglio esecuzione storica.
     \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole confrontare esecuzioni passate o recuperare informazioni pregresse.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\columnwidth]{img/usecase/uc3.png}
-    \caption{UC3 -- Gestione storico pianificazioni}
-    \label{fig:uc3}
+    \includegraphics[width=0.75\columnwidth]{img/usecase/uc6.png}
+    \caption{UC6 -- Gestione storico pianificazioni}
+    \label{fig:uc6}
 \end{figure}
 
-\paragraph{UC3.1 -- Consultazione storico pianificazioni}
+\paragraph{UC6.1 -- Consultazione elenco storico pianificazioni}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore apre l'elenco delle pianificazioni precedenti e ne consulta gli elementi principali.
-    \item \textbf{Precondizioni:} lo storico locale contiene almeno una pianificazione memorizzata.
-    \item \textbf{Postcondizioni:} l'Operatore ha consultato l'elenco storico.
-    \item \textbf{Trigger:} l'Operatore vuole accedere a una pianificazione già eseguita.
-\end{itemize}
-
-\paragraph{UC3.2 -- Consultazione dettaglio esecuzioni storiche}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore apre il dettaglio di una specifica esecuzione storica per visualizzarne esito, KPI e informazioni di supporto.
-    \item \textbf{Precondizioni:} esiste almeno una pianificazione storica selezionabile.
-    \item \textbf{Postcondizioni:} il dettaglio della specifica esecuzione è stato consultato.
-    \item \textbf{Trigger:} l'Operatore vuole approfondire una singola esecuzione dello storico.
-\end{itemize}
-
-\subsubsection{Configurazione avanzata simulazioni}
-
-\paragraph{UC4 -- Configurazione avanzata simulazioni}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore modifica alcuni parametri avanzati che influenzano la simulazione, come le priorità operative o la stima della disponibilità di nuovi ordini.
-    \item \textbf{Precondizioni:} l'Operatore dispone dell'accesso alle impostazioni avanzate.
-    \item \textbf{Postcondizioni:} i parametri avanzati vengono aggiornati e utilizzati nelle elaborazioni successive.
-    \item \textbf{Inclusioni:}
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore apre la sezione storico.
+        \item L'Operatore scorre l'elenco delle pianificazioni precedenti e ne consulta i dati principali: data, durata e stato dell'esecuzione.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
     \begin{itemize}
-        \item UC4.1 -- Modifica priorità operative
-        \item UC4.2 -- Stima ATP per nuovo ordine
+        \item l'applicazione è disponibile e raggiungibile.
+        \item lo storico locale contiene almeno una pianificazione memorizzata.
+        \item l'Operatore si trova nella sezione storico $\rightarrow$ UC6.
     \end{itemize}
-    \item \textbf{Trigger:} l'Operatore vuole raffinare il comportamento della pianificazione.
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ha consultato l'elenco delle esecuzioni passate.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole accedere allo storico delle pianificazioni eseguite.
+\end{itemize}
+
+\paragraph{UC6.2 -- Consultazione dettaglio esecuzione storica}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore seleziona una pianificazione dall'elenco storico $\rightarrow$ UC6.1.
+        \item L'Operatore visualizza il dettaglio dell'esecuzione: esito, KPI, log e task pianificati.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item esiste almeno una pianificazione storica selezionabile.
+        \item l'Operatore sta consultando l'elenco storico $\rightarrow$ UC6.1.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il dettaglio della specifica esecuzione storica è stato consultato.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole approfondire i dati di una singola esecuzione passata.
+\end{itemize}
+
+\subsubsection{Modifica priorità operative}
+
+\paragraph{UC7 -- Modifica priorità operative}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore accede alla sezione delle priorità operative.
+        \item L'Operatore modifica i valori di priorità da applicare alla logica di pianificazione.
+        \item Il sistema aggiorna i parametri per le elaborazioni successive.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il sistema consente la modifica dei parametri di priorità.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item le nuove priorità risultano pronte per essere applicate alla pianificazione successiva.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore desidera adattare la logica di schedulazione alle necessità operative correnti.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\columnwidth]{img/usecase/uc4.png}
-    \caption{UC4 -- Configurazione avanzata simulazioni}
-    \label{fig:uc4}
+    \includegraphics[width=0.75\columnwidth]{img/usecase/uc7.png}
+    \caption{UC7 -- Modifica priorità operative}
+    \label{fig:uc7}
 \end{figure}
 
-\paragraph{UC4.1 -- Modifica priorità operative}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore modifica le priorità operative da utilizzare nella logica di pianificazione.
-    \item \textbf{Precondizioni:} il sistema consente la modifica dei parametri di priorità.
-    \item \textbf{Postcondizioni:} le nuove priorità risultano pronte per la pianificazione successiva.
-    \item \textbf{Trigger:} l'Operatore desidera ottenere una pianificazione pi\`u aderente alle necessit\`a operative.
-\end{itemize}
+\subsubsection{Stima ATP per nuovo ordine}
 
-\paragraph{UC4.2 -- Stima ATP per nuovo ordine}
+\paragraph{UC8 -- Stima ATP per nuovo ordine}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:} l'Operatore richiede una stima di ATP (Available To Promise) per valutare in quale intervallo temporale un nuovo ordine possa essere inserito nel piano.
-    \item \textbf{Precondizioni:} il piano disponibile contiene informazioni sufficienti per eseguire la stima.
-    \item \textbf{Postcondizioni:} l'Operatore ottiene una stima utile alla valutazione del nuovo ordine.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore inserisce i parametri del nuovo ordine da valutare.
+        \item Il sistema calcola la stima di ATP (\textit{Available-To-Promise}) a partire dal piano disponibile.
+        \item L'Operatore riceve l'intervallo temporale stimato per l'inserimento del nuovo ordine.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item il piano disponibile contiene informazioni sufficienti per eseguire la stima $\rightarrow$ UC2.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item l'Operatore ottiene una stima della fattibilità temporale del nuovo ordine nel piano corrente.
+    \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole verificare la possibile collocazione di un nuovo ordine.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\columnwidth]{img/usecase/uc8.png}
+    \caption{UC8 -- Stima ATP per nuovo ordine}
+    \label{fig:uc8}
+\end{figure}
 
 \newpage
 
@@ -399,33 +645,41 @@ Tutti i requisiti riportati in questa sezione sono classificati come obbligatori
 \hline
 \endhead
 
-RFN-1  & Configurazione dei parametri di pianificazione & UC1.1 & N \\
+RFN-1  & Configurazione dei parametri di pianificazione & UC1 & N \\
 \hline
-RFN-2  & Avvio di una pianificazione & UC1.2 & N \\
+RFN-2  & Inserimento della data di inizio pianificazione & UC1.1 & N \\
 \hline
-RFN-3  & Monitoraggio dello stato di esecuzione & UC1.3 & N \\
+RFN-3  & Inserimento del timeout del solver & UC1.2 & N \\
 \hline
-RFN-4  & Consultazione log di esecuzione & UC1.3.1 & N \\
+RFN-4  & Selezione della strategia di risoluzione & UC1.3 & N \\
 \hline
-RFN-5  & Consultazione KPI della pianificazione & UC1.3.2 & N \\
+RFN-5  & Avvio della pianificazione & UC2 & N \\
 \hline
-RFN-6  & Consultazione telemetria di esecuzione & UC1.3.3 & N \\
+RFN-6  & Monitoraggio dell'esecuzione del solver & UC3 & N \\
 \hline
-RFN-7  & Visualizzazione del piano di produzione & UC2.1 & N \\
+RFN-7  & Consultazione log di esecuzione & UC3.1 & N \\
 \hline
-RFN-8  & Visualizzazione del diagramma di Gantt & UC2.1.1 & N \\
+RFN-8  & Consultazione KPI in tempo reale & UC3.2 & N \\
 \hline
-RFN-9  & Visualizzazione dei task pianificati & UC2.1.2 & N \\
+RFN-9  & Consultazione telemetria del solver & UC3.3 & N \\
 \hline
-RFN-10 & Esportazione del piano di produzione & UC2.3 & N \\
+RFN-10 & Consultazione dei risultati della pianificazione & UC4 & N \\
 \hline
-RFN-11 & Consultazione dello storico delle pianificazioni & UC3.1 & N \\
+RFN-11 & Visualizzazione del diagramma di Gantt & UC4.1 & N \\
 \hline
-RFN-12 & Analisi della qualit\`a del piano & UC2.2 & N \\
+RFN-12 & Visualizzazione dei task pianificati & UC4.2 & N \\
 \hline
-RFN-13 & Modifica delle priorit\`a operative & UC4.1 & N \\
+RFN-13 & Analisi della qualità del piano & UC4.3 & N \\
 \hline
-RFN-14 & Stima ATP per nuovi ordini & UC4.2 & N \\
+RFN-14 & Esportazione del piano in formato JSON & UC5 & N \\
+\hline
+RFN-15 & Consultazione dell'elenco storico pianificazioni & UC6.1 & N \\
+\hline
+RFN-16 & Consultazione del dettaglio di esecuzioni storiche & UC6.2 & N \\
+\hline
+RFN-17 & Modifica delle priorità operative & UC7 & N \\
+\hline
+RFN-18 & Stima ATP per nuovi ordini & UC8 & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti funzionali.}
@@ -450,17 +704,17 @@ RFN-14 & Stima ATP per nuovi ordini & UC4.2 & N \\
 \hline
 \endhead
 
-RQN-1 & L'interfaccia deve risultare intuitiva e utilizzabile dagli operatori & UC1, UC2, UC3, UC4 & N \\
+RQN-1 & L'interfaccia deve risultare intuitiva e utilizzabile dagli operatori & UC1--UC8 & N \\
 \hline
-RQN-2 & Il sistema deve garantire tempi di risposta adeguati & UC2.1, UC2.2 & N \\
+RQN-2 & Il sistema deve garantire tempi di risposta adeguati nella visualizzazione dei risultati & UC4 & N \\
 \hline
-RQN-3 & Le informazioni di esecuzione devono essere aggiornate in modo continuo & UC1.3 & N \\
+RQN-3 & Le informazioni di esecuzione devono essere aggiornate in modo continuo durante il calcolo & UC3 & N \\
 \hline
-RQN-4 & La pianificazione deve rispettare i vincoli del modello di schedulazione & UC1.2 & N \\
+RQN-4 & La pianificazione deve rispettare i vincoli del modello di schedulazione & UC2 & N \\
 \hline
-RQN-5 & I dati esportati devono essere compatibili con strumenti esterni & UC2.3 & N \\
+RQN-5 & I dati esportati devono essere compatibili con strumenti esterni & UC5 & N \\
 \hline
-RQN-6 & Le esecuzioni devono essere tracciabili nello storico locale & UC3.1, UC3.2 & N \\
+RQN-6 & Le esecuzioni devono essere tracciabili nello storico locale & UC6.1, UC6.2 & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti qualitativi.}
@@ -485,15 +739,15 @@ RQN-6 & Le esecuzioni devono essere tracciabili nello storico locale & UC3.1, UC
 \hline
 \endhead
 
-RVN-1 & Il sistema deve essere sviluppato in linguaggio C++ & - & N \\
+RVN-1 & Il sistema deve essere sviluppato in linguaggio C++ & -- & N \\
 \hline
-RVN-2 & L'interfaccia grafica deve essere realizzata con Qt6 & - & N \\
+RVN-2 & L'interfaccia grafica deve essere realizzata con Qt6 & -- & N \\
 \hline
-RVN-3 & Il solver di pianificazione deve utilizzare Google OR-Tools & UC1.2 & N \\
+RVN-3 & Il solver di pianificazione deve utilizzare Google OR-Tools & UC2 & N \\
 \hline
-RVN-4 & L'esportazione dei dati deve avvenire in formato JSON & UC2.3 & N \\
+RVN-4 & L'esportazione dei dati deve avvenire in formato JSON & UC5 & N \\
 \hline
-RVN-5 & Lo storico locale deve essere persistito tramite SQLite & UC3.1, UC3.2 & N \\
+RVN-5 & Lo storico locale deve essere persistito tramite SQLite & UC6.1, UC6.2 & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti di vincolo.}

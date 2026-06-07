@@ -1,0 +1,22 @@
+@startuml uc7
+left to right direction
+skinparam backgroundColor white
+skinparam usecase {
+    BackgroundColor White
+    BorderColor #555555
+    ArrowColor #555555
+    FontSize 11
+}
+skinparam actor {
+    BackgroundColor White
+    BorderColor #555555
+}
+
+actor "Operatore" as op
+
+rectangle "UC7 - Modifica priorita operative" {
+    (UC7\nModifica\npriorita operative) as UC7
+}
+
+op --> UC7
+@enduml

@@ -1,40 +1,280 @@
 \chapter{Progettazione e codifica}
 \label{chap:progettazione-codifica}
-Breve introduzione al capitolo
+
+\textit{In questo capitolo vengono descritte le scelte tecnologiche, architetturali e implementative adottate durante lo sviluppo del sistema. Viene prima fornita una panoramica delle tecnologie e degli strumenti utilizzati, seguita dall'illustrazione dell'architettura generale, dei design pattern applicati e dei principali componenti realizzati.}
 
 \section{Tecnologie e strumenti}
 \label{sec:tecnologie-strumenti}
-Di seguito viene data una panoramica delle tecnologie e strumenti utilizzati.
 
-\subsection*{Tecnologia 1}
-Descrizione Tecnologia 1.
+Il sistema è realizzato interamente in C++ ed è articolato in più componenti: un'applicazione desktop Qt, un nucleo di pianificazione condiviso e server opzionali (gRPC, HTTP) per l'integrazione remota. La scelta delle tecnologie è stata orientata da requisiti di prestazione, integrazione con l'ecosistema ERP esistente e supporto alla programmazione a vincoli.
 
-\subsection*{Tecnologia 2}
-Descrizione Tecnologia 2
+\subsection{Linguaggi e strumenti di sviluppo}
+\label{subsec:linguaggi}
 
-\section{Ciclo di vita del software}
-\label{sec:ciclo-vita-software}
+\subsubsection{C++20}
 
-\section{Progettazione}
-\label{sec:progettazione}
+C++20 è lo standard ISO del linguaggio C++ adottato nel progetto (requisito RVN-1). Rispetto alle versioni precedenti, introduce diverse funzionalità rilevanti per il sistema sviluppato: \texttt{std::optional} per modellare valori nullable provenienti dal database (es. la data di consegna di un ordine), l'attributo \texttt{[[nodiscard]]} per segnalare al compilatore che il valore di ritorno non deve essere ignorato silenziosamente, e le \textit{structured bindings} per iterazioni più espressive su strutture dati. La scelta di C++ come linguaggio principale è dettata anche dalla necessità di integrarsi direttamente con la libreria Google OR-Tools, la cui API nativa è in C++.
 
-\subsection{Namespace 1}
-Descrizione namespace 1.
+\subsubsection{Qt6}
 
-\section{Design Pattern utilizzati}
+Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, mantenuto da Qt Group. Qt6 è la versione adottata per la realizzazione dell'interfaccia grafica del sistema (requisito RVN-2). Tra le sue caratteristiche fondamentali per il progetto:
 
-\section{Codifica}
-Blocco di codice in C
+\begin{itemize}
+    \item \textbf{Signals \& Slots}: meccanismo di comunicazione tra oggetti che consente di connettere eventi (\textit{signals}) emessi da un oggetto a metodi (\textit{slots}) di un altro, anche tra thread diversi, grazie alle \textit{queued connections} che garantiscono la thread-safety degli aggiornamenti alla UI.
+    \item \textbf{QThread e pattern worker}: permettono di eseguire operazioni lunghe in background senza bloccare il thread principale della UI, pattern fondamentale per integrare il solver CP-SAT nell'applicazione desktop.
+    \item \textbf{Widget predefiniti}: \texttt{QTableWidget}, \texttt{QPlainTextEdit}, \texttt{QSplitter} e altri componenti grafici standard usati per costruire le viste di configurazione, monitoraggio e risultati.
+    \item \textbf{QPainter}: API di disegno vettoriale 2D, impiegata per il rendering personalizzato del diagramma di Gantt nella classe \texttt{GanttWidget}.
+\end{itemize}
+
+\subsubsection{CMake}
+
+CMake è un sistema di build open source e multipiattaforma che genera file di build nativi (Makefile, Ninja, progetti Visual Studio) a partire da una descrizione dichiarativa in file \texttt{CMakeLists.txt}. Nel progetto CMake gestisce la compilazione dei quattro target principali (\texttt{erpai\_ui}, \texttt{erpai\_daemon}, \texttt{erpai\_grpc\_solver}, \texttt{erpai\_http}) e le dipendenze verso OR-Tools, MariaDB Connector/C++, Qt6 e le librerie gRPC/Protobuf.
+
+\subsection{Librerie}
+\label{subsec:librerie}
+
+\subsubsection{Google OR-Tools}
+
+Google OR-Tools è una libreria open source sviluppata da Google per la risoluzione di problemi di ottimizzazione combinatoria. Il componente chiave utilizzato nel progetto è il solver \textbf{CP-SAT} (\textit{Constraint Programming - Satisfiability}), un motore di programmazione a vincoli basato su tecniche SAT moderne. CP-SAT è particolarmente adatto alla schedulazione di produzione perché supporta nativamente:
+
+\begin{itemize}
+    \item \textbf{Variabili di intervallo} (\texttt{IntervalVar}): rappresentano i task come intervalli temporali con variabili di inizio, fine e durata.
+    \item \textbf{Vincoli di non sovrapposizione} (\texttt{AddNoOverlap}): garantiscono che su ogni macchina non vengano eseguiti due task contemporaneamente.
+    \item \textbf{Vincoli di capacità cumulativa} (\texttt{AddCumulative}): modellano la capacità dei gruppi di macchine, in cui più macchine dello stesso gruppo possono lavorare in parallelo.
+    \item \textbf{Funzioni obiettivo multi-criterio}: il solver minimizza la lateness totale rispetto alle date di consegna, usando il makespan come criterio secondario di spareggio.
+\end{itemize}
+
+Il solver opera su dominio intero, coerente con la rappresentazione dei tempi in minuti adottata nel progetto. La scelta di OR-Tools è dettata dal requisito RVN-3.
+
+\subsubsection{MariaDB Connector/C++}
+
+MariaDB Connector/C++ è il driver ufficiale per la connessione a database MariaDB/MySQL da applicazioni C++. Viene impiegato per caricare dal database ERP i dati di input alla pianificazione: ordini di produzione (\texttt{mrp\_steps\_plans}), fasi di lavorazione (\texttt{steps}), macchine, gruppi macchina e relative associazioni. Le strutture dati caricate (es. \texttt{MrpStepsPlans}, \texttt{Steps}, \texttt{Machines}) sono modellate come classi C++ corrispondenti alle tabelle del gestionale aziendale, gestite nel namespace \texttt{db}.
+
+\subsubsection{gRPC e Protocol Buffers}
+
+gRPC è un framework open source per chiamate a procedure remote ad alte prestazioni, sviluppato da Google. Utilizza Protocol Buffers come formato di serializzazione dei messaggi. Nel progetto, il file \texttt{solver\_service.proto} definisce il contratto dell'interfaccia del solver remoto: il servizio \texttt{PlanningService} espone un metodo \texttt{RunPlanning} che accetta una configurazione di run e restituisce in streaming gli aggiornamenti di stato. Questo componente consente di eseguire il solver su un server dedicato e di interrogarlo dall'applicazione Qt tramite la classe \texttt{RemoteSolverClient}.
+
+\subsection{Containerizzazione}
+\label{subsec:docker}
+
+\subsubsection{Docker}
+
+Docker è una piattaforma open source per la containerizzazione di applicazioni. I target server del progetto (gRPC e HTTP) vengono distribuiti come immagini Docker tramite i file \texttt{Dockerfile.grpc} e \texttt{Dockerfile.http}, accompagnati dai rispettivi file \texttt{docker-compose.grpc.yml} e \texttt{docker-compose.http.yml}. Questo approccio garantisce la riproducibilità dell'ambiente di esecuzione e semplifica il deploy del componente solver in scenari di integrazione con sistemi aziendali esterni.
+
+\subsection{Persistenza locale}
+\label{subsec:sqlite}
+
+\subsubsection{SQLite}
+
+SQLite è una libreria C che implementa un motore di database SQL embedded, senza necessità di un server separato. Nel progetto viene impiegata per la persistenza dello storico locale delle pianificazioni (requisito RVN-5). La classe \texttt{LocalRunStore} gestisce un file \texttt{.db} nella directory dell'eseguibile, creando e mantenendo le tabelle \texttt{runs}, \texttt{run\_logs} e \texttt{run\_tasks} attraverso le API C di SQLite. La scelta di SQLite garantisce leggerezza, portabilità e assenza di dipendenze esterne lato client.
+
+\section{Architettura del sistema}
+\label{sec:architettura}
+
+Il sistema è progettato attorno a un \textbf{nucleo condiviso} (\texttt{core}) separato da qualsiasi dipendenza verso UI, database o protocollo di comunicazione. Questo nucleo espone \texttt{PlanningRunner} come orchestratore del flusso di pianificazione e \texttt{IPlanningObserver} come punto di estensione per la distribuzione degli eventi.
+
+Quattro target applicativi condividono lo stesso nucleo:
+
+\begin{itemize}
+    \item \textbf{erpai\_ui}: applicazione desktop Qt, entry point principale per l'Operatore.
+    \item \textbf{erpai\_daemon}: applicazione console, per esecuzioni headless o da script.
+    \item \textbf{erpai\_grpc\_solver}: server gRPC, per integrazione remota con altri sistemi.
+    \item \textbf{erpai\_http}: server HTTP, alternativa REST-based all'interfaccia gRPC.
+\end{itemize}
+
+Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità.
+
+\subsection{Pipeline di pianificazione}
+\label{subsec:pipeline}
+
+Il flusso di esecuzione di una pianificazione segue le fasi descritte di seguito.
+
+\begin{enumerate}
+    \item \textbf{Caricamento dati} (\texttt{MrpDataLoader}): carica da MariaDB gli ordini di produzione, le fasi di lavorazione, le macchine, i calendari lavorativi per macchina e le impostazioni MRP.
+    \item \textbf{Costruzione task} (\texttt{PlanningInput}): trasforma i record di database in strutture \texttt{TaskData} con durata calcolata (\texttt{setup\_seconds + qta $\times$ unit\_seconds}) e relazioni di precedenza tra fasi dello stesso job, derivate dal \texttt{phase\_number}.
+    \item \textbf{Pre-processing MRP} (\texttt{BomRecursion}, \texttt{ForecastBatching}): applica la ricorsione sulla distinta base e raggruppa i lotti di previsione in entità pianificabili.
+    \item \textbf{Costruzione modello CP-SAT} (\texttt{ModelBuilder}): crea per ogni task le variabili CP-SAT (\texttt{IntVar start}, \texttt{IntVar end}, \texttt{IntervalVar interval}), aggiunge i vincoli di non sovrapposizione per macchina, i vincoli di capacità cumulativa per gruppo macchina, le precedenze tra fasi e i vincoli di calendario lavorativo giornaliero.
+    \item \textbf{Risoluzione} (\texttt{TwoPhaseSolver}): esegue la pipeline a due fasi descritta nella sezione~\ref{subsec:twophase}.
+    \item \textbf{Estrazione risultati} (\texttt{ResultExtractor}): converte la soluzione CP-SAT in strutture \texttt{ScheduledTaskInfo} con inizio e fine in data/ora assoluta.
+    \item \textbf{Notifica osservatori} (\texttt{IPlanningObserver}): distribuisce KPI, log e task schedulati a tutti gli osservatori registrati.
+\end{enumerate}
+
+\subsection{Solver a due fasi}
+\label{subsec:twophase}
+
+Il \texttt{TwoPhaseSolver} implementa una pipeline di risoluzione a due fasi per gestire la complessità del problema in presenza di calendari lavorativi e vincoli multipli.
+
+\begin{itemize}
+    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode::Phase1Light}), senza i vincoli di calendario più stringenti. Produce una soluzione iniziale in tempi brevi.
+    \item \textbf{Hinting}: la soluzione della fase 1 viene estratta tramite \texttt{SolutionHintBuilder} e iniettata come suggerimento (\textit{warm start}) nel modello completo, guidando il solver verso la regione dello spazio di ricerca più promettente.
+    \item \textbf{Fase 2 (Full)}: ottimizza sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce calendari giornalieri per macchina, vincoli di capacità cumulativa e funzione obiettivo multi-criterio (lateness totale dei job + makespan come criterio secondario).
+\end{itemize}
+
+Qualora la fase 2 non produca una soluzione migliore entro il timeout configurato, il sistema adotta come risultato finale la soluzione della fase 1 (\textit{fallback}).
+
+\section{Design Pattern adottati}
+\label{sec:design-pattern}
+
+\subsection{Observer}
+\label{subsec:observer}
+
+Il pattern Observer definisce una dipendenza uno-a-molti tra oggetti, in modo che quando un oggetto cambia stato tutti i suoi osservatori vengano notificati automaticamente. Nel sistema sviluppato, il pattern è implementato tramite l'interfaccia astratta \texttt{IPlanningObserver} (namespace \texttt{core}).
+
+L'interfaccia dichiara i metodi di notifica per tutti gli eventi rilevanti del ciclo di vita di una pianificazione: avvio del run (\texttt{onRunStarted}), cambio di fase (\texttt{onPhaseChanged}), messaggi di log (\texttt{onLogMessage}), aggiornamenti KPI (\texttt{onKpiUpdated}), task schedulati (\texttt{onTaskScheduled}), warning di validazione (\texttt{onValidationWarning}) e completamento del run (\texttt{onRunFinished}). Metodi aggiuntivi per la telemetria realtime del solver (\texttt{onSolverTelemetry}, \texttt{onSolverIncumbent}, \texttt{onTaskBatch}, ecc.) sono definiti con implementazione di default no-op, preservando la retro-compatibilità con le implementazioni esistenti.
+
 \begin{listing}[H]
-\begin{minted}{c}
-#include <stdio.h>
-int main() {
-    print("Hello, world!");
-    return 0;
-}
+\begin{minted}{cpp}
+class IPlanningObserver {
+public:
+    virtual ~IPlanningObserver() = default;
+
+    virtual void onRunStarted(const std::string& plan_start,
+                              int total_tasks) = 0;
+    virtual void onPhaseChanged(const PhaseInfo& phase) = 0;
+    virtual void onLogMessage(const std::string& message,
+                              ValidationWarning::Level level
+                                  = ValidationWarning::Level::Info) = 0;
+    virtual void onKpiUpdated(const SolverKpi& kpi) = 0;
+    virtual void onTaskScheduled(const ScheduledTaskInfo& task) = 0;
+    virtual void onValidationWarning(const ValidationWarning& w) = 0;
+    virtual void onRunFinished(const PlanningReport& report) = 0;
+
+    // Metodi con implementazione di default no-op (retro-compatibili)
+    virtual void onSolverTelemetry(const SolverTelemetrySnapshot&) {}
+    virtual void onTaskBatch(const TaskBatchEvent&) {}
+    virtual void onMachineTimeline(
+        const std::vector<MachineTimelineRow>&) {}
+};
 \end{minted}
-\caption{Example of code}
-\label{listing:c}
+\caption{Interfaccia \texttt{IPlanningObserver} (semplificata).}
+\label{listing:observer}
 \end{listing}
+
+Quattro implementazioni concrete dell'interfaccia vengono utilizzate nel progetto:
+\begin{itemize}
+    \item \texttt{ConsoleObserver}: stampa gli eventi su stdout, usata dal target daemon.
+    \item \texttt{SqliteRunObserver}: persiste i dati del run nello storico SQLite locale.
+    \item \texttt{HttpPlanningObserver}: invia callback HTTP al termine di ogni fase.
+    \item L'implementazione Qt nel \texttt{PlannerWorker}: traduce le notifiche in segnali Qt, instradati alla UI tramite queued connections.
+\end{itemize}
+
+Il \texttt{CompositeObserver} consente di registrare più osservatori simultaneamente, effettuando il fan-out delle notifiche verso ciascuno.
+
+\subsection{Strategy}
+\label{subsec:strategy}
+
+Il pattern Strategy definisce una famiglia di algoritmi intercambiabili, incapsulandoli in unità separate. Nel sistema, le diverse strategie di risoluzione CP-SAT sono implementate come funzioni distinte nello spazio dei nomi \texttt{planning}:
+
+\begin{itemize}
+    \item \texttt{solveBasicNoOverlap}: modello minimale con soli vincoli di non sovrapposizione per macchina.
+    \item \texttt{solveWithDueDates}: aggiunge la penalizzazione del ritardo rispetto alle date di consegna.
+    \item \texttt{solveWithGroupCapacityAndFixedOrders}: introduce i vincoli di capacità cumulativa per gruppi di macchine e gli ordini di produzione già confermati.
+    \item \texttt{solveWithPhasePrecedences}: aggiunge i vincoli di precedenza tra le fasi dello stesso job.
+    \item \texttt{solveTwoPhase}: pipeline a due fasi con hinting, descritta nella sezione~\ref{subsec:twophase}.
+\end{itemize}
+
+La scelta della strategia da applicare è controllata dall'enum \texttt{SolverPhases} e dalla struttura di configurazione \texttt{SolverRunConfig}, passata a \texttt{PlanningRunner} prima dell'avvio.
+
+\subsection{Worker Thread}
+\label{subsec:worker}
+
+Nel contesto di Qt, il pattern Worker Thread separa l'esecuzione di operazioni potenzialmente lunghe dal thread principale della UI. La classe \texttt{PlannerWorker} (namespace \texttt{ui}) implementa questo pattern estendendo \texttt{QObject}.
+
+\texttt{PlannerWorker} viene istanziato dalla \texttt{MainWindow}, spostato su un \texttt{QThread} dedicato tramite \texttt{moveToThread} e connesso ai widget della UI tramite signals/slots. I segnali emessi da \texttt{PlannerWorker} durante l'esecuzione del solver (es. \texttt{kpiUpdated}, \texttt{taskBatch}, \texttt{machineTimeline}, \texttt{logMessage}) vengono recapitati al thread della UI attraverso queued connections automatiche, garantendo la thread-safety degli aggiornamenti grafici senza alcun mutex esplicito nel codice UI.
+
+\begin{listing}[H]
+\begin{minted}{cpp}
+class PlannerWorker : public QObject {
+    Q_OBJECT
+public slots:
+    void startRunWithConfig(planning::SolverRunConfig cfg);
+signals:
+    void runStarted(const QString& plan_start, int total_tasks);
+    void phaseChanged(const QString& name, int idx, const QString& desc);
+    void logMessage(const QString& message, int level);
+    void kpiUpdated(core::SolverKpi kpi);
+    void taskBatch(core::TaskBatchEvent batch);
+    void machineTimeline(std::vector<core::MachineTimelineRow> rows);
+    void runFinished(core::PlanningReport report);
+    void finished();
+};
+\end{minted}
+\caption{Interfaccia pubblica di \texttt{PlannerWorker} (semplificata).}
+\label{listing:plannerworker}
+\end{listing}
+
+\subsection{Repository}
+\label{subsec:repository}
+
+Il pattern Repository fornisce un'astrazione tra la logica applicativa e il layer di persistenza dei dati. L'interfaccia \texttt{RunStoreAccess} definisce il contratto per l'accesso allo storico locale. La classe \texttt{LocalRunStore} implementa tale contratto utilizzando SQLite come motore di persistenza.
+
+\texttt{LocalRunStore} gestisce tre tabelle: \texttt{runs} (metadati e KPI di ogni pianificazione), \texttt{run\_logs} (messaggi di log associati al run) e \texttt{run\_tasks} (task schedulati con inizio, fine e macchina assegnata). Tutte le operazioni di scrittura e lettura sono protette da un \texttt{std::mutex}, garantendo la correttezza in caso di accesso concorrente da più thread.
+
+\section{Struttura del progetto}
+\label{sec:struttura-progetto}
+
+Il codice sorgente è organizzato in moduli con responsabilità ben definite, riportati nella struttura di cartelle seguente.
+
+\begin{listing}[H]
+\begin{minted}{text}
+src/
++-- apps/
+|   +-- daemon/       # target console (headless)
+|   +-- grpc_server/  # target server gRPC
+|   +-- http/         # target server HTTP REST
+|   +-- ui/           # target applicazione desktop Qt
+|   |   +-- monitor/  # campionamento risorse di processo
+|   |   +-- widgets/  # MainWindow, GanttWidget, SparklineChart
+|   |   '-- worker/   # PlannerWorker (thread separato)
++-- core/
+|   +-- observer/     # IPlanningObserver, CompositeObserver, PlanningEvents
+|   '-- PlanningRunner.h/.cpp
++-- db/               # strutture dati ORM (tabelle ERP)
++-- local_db/         # SqliteRunObserver, LocalRunStore, RunStoreAccess
++-- planning/
+|   +-- mrp/          # MrpDataLoader, BomRecursion, ForecastBatching
+|   +-- planner/      # ModelBuilder, TwoPhaseSolver, SolverPhases
+|   '-- reporting/    # ConsoleScheduleReport
++-- proto/            # solver_service.proto (contratto gRPC)
+'-- utils/            # DateTime e utility generali
+\end{minted}
+\caption{Struttura delle cartelle del progetto.}
+\label{listing:struttura}
+\end{listing}
+
+La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il principio di dipendenza unidirezionale: le applicazioni dipendono dal core, il core non dipende da nessuna applicazione. In questo modo è possibile aggiungere nuovi target (es. un client CLI) senza modificare la logica di pianificazione.
+
+\section{Componenti principali}
+\label{sec:componenti}
+
+\subsection{PlanningRunner}
+\label{subsec:planningrunner}
+
+\texttt{PlanningRunner} è l'orchestratore centrale del flusso di pianificazione. Espone due metodi \texttt{run}: uno semplificato che accetta data di inizio e timeout, e uno avanzato che riceve una struttura \texttt{SolverRunConfig} con tutti i parametri configurabili. Prima dell'avvio, l'osservatore viene impostato tramite \texttt{setObserver}; il runner invoca i callback dell'observer ad ogni fase significativa del flusso.
+
+\subsection{ModelBuilder}
+\label{subsec:modelbuilder}
+
+\texttt{ModelBuilder} costruisce il modello CP-SAT completo per la pianificazione. La funzione principale \texttt{buildGroupCapacityModel} crea le variabili di intervallo per ogni task o chunk di task, applica i vincoli di non sovrapposizione sulle macchine (\texttt{AddNoOverlap}), i vincoli di capacità cumulativa sui gruppi di macchine (\texttt{AddCumulative}), i vincoli di precedenza tra fasi dello stesso job e i vincoli del calendario lavorativo giornaliero per macchina. La funzione \texttt{applyStandardObjective} aggiunge la funzione obiettivo al modello: minimizzazione della lateness totale dei job se sono presenti date di consegna, altrimenti minimizzazione del makespan.
+
+\subsection{TwoPhaseSolver}
+\label{subsec:twophasesolver}
+
+\texttt{TwoPhaseSolver} implementa la funzione \texttt{solveTwoPhase}, che coordina le due fasi di risoluzione descritte nella sezione~\ref{subsec:twophase}. Notifica l'observer ad ogni cambio di fase e al termine di ciascuna risoluzione, consentendo all'interfaccia grafica di mostrare lo stato di avanzamento in tempo reale. La struttura \texttt{SchedulerBenchResult} registra per ogni esecuzione lo stato del solver (\texttt{OPTIMAL}, \texttt{FEASIBLE}, \texttt{INFEASIBLE}), il valore dell'obiettivo, il bound migliore e il tempo impiegato; la funzione \texttt{selectBestBenchResult} determina il miglior risultato secondo una gerarchia di criteri: ottimalità, obiettivo minore, gap assoluto minore, tempo minore.
+
+\subsection{LocalRunStore}
+\label{subsec:localrunstore}
+
+\texttt{LocalRunStore} gestisce la persistenza dello storico locale su file SQLite. L'inserimento di un run avviene in tre fasi: \texttt{insertRun} (status \textit{running}), \texttt{updateRunKpi} (aggiornamenti intermedi durante il run) e \texttt{finalizeRun} (chiusura con KPI finali e status \textit{finished} o \textit{failed}). I log vengono scritti incrementalmente con \texttt{insertLog}; i task schedulati vengono salvati in batch con \texttt{insertRunTasks} al termine del run. Tutte le operazioni sono thread-safe grazie a un \texttt{std::mutex} interno.
+
+\subsection{PlannerWorker}
+\label{subsec:plannerworker}
+
+\texttt{PlannerWorker} è il bridge tra il solver CP-SAT e la UI Qt. Implementa l'interfaccia \texttt{IPlanningObserver} traducendo ogni callback del solver in un segnale Qt. Poiché il solver gira in un thread separato, le queued connections di Qt garantiscono che i segnali vengano processati nel thread della UI senza necessità di sincronizzazione esplicita. I tipi custom (es. \texttt{SolverKpi}, \texttt{PlanningReport}, \texttt{MachineTimelineRow}) sono registrati nel meta-object system di Qt tramite \texttt{Q\_DECLARE\_METATYPE}.
+
+\subsection{GanttWidget}
+\label{subsec:ganttwidget}
+
+\texttt{GanttWidget} è un widget Qt personalizzato che visualizza il diagramma di Gantt del piano generato. Il rendering è realizzato con \texttt{QPainter}: sull'asse orizzontale è rappresentata la linea temporale del piano; sull'asse verticale sono elencate le macchine. Ogni task schedulato è disegnato come un blocco colorato sulla riga della macchina assegnata, con tooltip che mostrano il dettaglio dell'ordine. Il widget si aggiorna in tempo reale durante l'esecuzione del solver, ricevendo i blocchi Gantt tramite il segnale \texttt{machineTimeline} di \texttt{PlannerWorker}.
 
 \newpage
