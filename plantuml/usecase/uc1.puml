@@ -19,10 +19,12 @@ rectangle "UC1 - Configurazione pianificazione" {
     (UC1.1\nInserimento data\ndi inizio) as UC11
     (UC1.2\nInserimento timeout\ndel solver) as UC12
     (UC1.3\nSelezione strategia\ndi risoluzione) as UC13
+    (UC1.4\nSelezione modalita\ndi esecuzione solver) as UC14
 }
 
 op --> UC1
 UC1 ..> UC11 : <<include>>
 UC1 ..> UC12 : <<include>>
 UC1 ..> UC13 : <<include>>
+UC1 ..> UC14 : <<include>>
 @enduml

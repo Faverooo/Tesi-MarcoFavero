@@ -13,6 +13,7 @@ skinparam actor {
 }
 
 actor "Operatore" as op
+actor "Sistema ERP" as erp
 
 rectangle "Sistema di pianificazione produzione" {
     (UC1\nConfigurazione\npianificazione) as UC1
@@ -23,6 +24,7 @@ rectangle "Sistema di pianificazione produzione" {
     (UC6\nGestione\nstorico) as UC6
     (UC7\nModifica\npriorita operative) as UC7
     (UC8\nStima ATP\nnuovo ordine) as UC8
+    (UC9\nConsultazione stato\nrun via API) as UC9
 }
 
 op --> UC1
@@ -33,4 +35,7 @@ op --> UC5
 op --> UC6
 op --> UC7
 op --> UC8
+
+erp --> UC2
+erp --> UC9
 @enduml

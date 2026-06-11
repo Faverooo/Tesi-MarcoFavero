@@ -3,11 +3,16 @@
 
 \section{Analisi degli utenti}
 
-Il sistema sviluppato nel contesto dello stage è un'applicazione desktop realizzata in Qt che consente di configurare, avviare e consultare pianificazioni di produzione generate tramite un solver di schedulazione a capacità finita basato su Google OR-Tools.
+Il sistema sviluppato nel contesto dello stage è un modulo di schedulazione C++ che espone la propria logica attraverso due interfacce principali: un'applicazione desktop basata su Qt (\texttt{erpai\_ui}), utilizzata per configurare, avviare e analizzare le pianificazioni durante lo sviluppo e il testing, e un server HTTP basato su Drogon (\texttt{erpai\_http}), attraverso cui il sistema gestionale ERP in PHP integra il solver in produzione.
 
-L'utente che interagisce con il sistema viene indicato come \textbf{Operatore}. Con questo termine si intende qualsiasi persona autorizzata a usare il tool, sia per l'avvio di una pianificazione sia per la consultazione dei risultati, dello storico e dei dati di supporto. Il sistema non viene modellato come attore: ogni caso d'uso è sempre attivato da un'azione dell'Operatore.
+Il sistema riconosce due attori:
 
-L'operatore di riferimento è tipicamente una figura tecnica o semi-tecnica, abituata a lavorare con strumenti gestionali e pannelli di monitoraggio. Di conseguenza l'interfaccia deve privilegiare chiarezza, immediatezza e coerenza tra le varie viste, in particolare nelle schermate di configurazione, di monitoraggio e di analisi del piano.
+\begin{itemize}
+    \item \textbf{Operatore}: figura tecnica o semi-tecnica autorizzata a interagire con l'interfaccia Qt per configurare i parametri, avviare pianificazioni e analizzarne i risultati. È il soggetto principale della maggior parte dei casi d'uso descritti nel presente capitolo.
+    \item \textbf{Sistema ERP}: applicazione PHP che, tramite l'API HTTP, avvia pianificazioni in modo automatizzato e ne ottiene i risultati senza intervento umano diretto. Partecipa esclusivamente alla specializzazione UC2.B dell'avvio pianificazione.
+\end{itemize}
+
+L'Operatore è tipicamente abituato a lavorare con strumenti gestionali e pannelli di monitoraggio. Di conseguenza l'interfaccia deve privilegiare chiarezza, immediatezza e coerenza tra le varie viste, in particolare nelle schermate di configurazione, di monitoraggio e di analisi del piano.
 
 \section{Casi d'uso}
 
@@ -69,9 +74,14 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item UC1.1 -- Inserimento data di inizio pianificazione
         \item UC1.2 -- Inserimento timeout del solver
         \item UC1.3 -- Selezione strategia di risoluzione
+        \item UC1.4 -- Selezione modalità di esecuzione del solver
     \end{itemize}
 
     \item \textbf{UC2 -- Avvio pianificazione}
+    \begin{itemize}
+        \item UC2.A -- Avvio da interfaccia Qt (specializzazione per Operatore)
+        \item UC2.B -- Avvio da API HTTP (specializzazione per Sistema ERP)
+    \end{itemize}
 
     \item \textbf{UC3 -- Monitoraggio esecuzione}
     \begin{itemize}
@@ -98,6 +108,8 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{UC7 -- Modifica priorità operative}
 
     \item \textbf{UC8 -- Stima ATP per nuovo ordine}
+
+    \item \textbf{UC9 -- Consultazione stato pianificazione via API}
 \end{itemize}
 
 \subsection{Dettaglio dei casi d'uso}
@@ -112,6 +124,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item L'Operatore imposta la data di inizio della pianificazione $\rightarrow$ UC1.1.
         \item L'Operatore configura il timeout massimo del solver $\rightarrow$ UC1.2.
         \item L'Operatore seleziona la strategia di risoluzione da applicare $\rightarrow$ UC1.3.
+        \item L'Operatore sceglie la modalità di esecuzione del solver $\rightarrow$ UC1.4.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
@@ -127,6 +140,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item UC1.1 -- Inserimento data di inizio pianificazione.
         \item UC1.2 -- Inserimento timeout del solver.
         \item UC1.3 -- Selezione strategia di risoluzione.
+        \item UC1.4 -- Selezione modalità di esecuzione del solver.
     \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole preparare una nuova esecuzione del solver.
 \end{itemize}
@@ -198,14 +212,34 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Trigger:} l'Operatore vuole scegliere il metodo di risoluzione più adatto al contesto corrente.
 \end{itemize}
 
-\subsubsection{Avvio pianificazione}
-
-\paragraph{UC2 -- Avvio pianificazione}
+\paragraph{UC1.4 -- Selezione modalità di esecuzione del solver}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
-        \item L'Operatore preme il pulsante di avvio.
+        \item L'Operatore accede al selettore della modalità di esecuzione.
+        \item L'Operatore sceglie se eseguire la fase di calcolo CP-SAT localmente oppure delegarla a un server remoto tramite gRPC.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione è disponibile e raggiungibile.
+        \item l'Operatore si trova nella schermata di configurazione $\rightarrow$ UC1.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item la modalità di esecuzione risulta impostata nel form di configurazione.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore vuole decidere se delegare il calcolo a un server dedicato o eseguirlo localmente.
+\end{itemize}
+
+\subsubsection{Avvio pianificazione}
+
+\paragraph{UC2 -- Avvio pianificazione}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore (tramite interfaccia Qt) o Sistema ERP (tramite API HTTP).
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item Il sistema riceve la richiesta di avvio.
         \item Il sistema carica i dati di produzione dal database ERP.
         \item Il sistema costruisce il modello CP-SAT e lo sottopone al solver.
         \item Il solver produce il piano di produzione.
@@ -213,7 +247,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
-        \item l'applicazione è disponibile e raggiungibile.
+        \item l'interfaccia di accesso è disponibile e raggiungibile.
         \item la configurazione è stata completata $\rightarrow$ UC1.
         \item il database ERP è accessibile e contiene dati di produzione validi.
     \end{itemize}
@@ -223,7 +257,12 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item l'esecuzione è registrata nello storico locale con esito positivo.
     \end{itemize}
     \item \textbf{Scenario alternativo:} il solver restituisce una soluzione non ammissibile (stato \texttt{INFEASIBLE}) oppure viene interrotto per timeout senza aver trovato alcuna soluzione; il sistema registra l'errore nei log, aggiorna lo storico con esito negativo e non produce alcun piano.
-    \item \textbf{Trigger:} l'Operatore vuole calcolare una nuova soluzione di pianificazione.
+    \item \textbf{Specializzazioni:}
+    \begin{itemize}
+        \item UC2.A -- Avvio da interfaccia Qt.
+        \item UC2.B -- Avvio da API HTTP.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore o il Sistema ERP richiede il calcolo di una nuova soluzione di pianificazione.
 \end{itemize}
 
 \begin{figure}[H]
@@ -232,6 +271,50 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \caption{UC2 -- Avvio pianificazione}
     \label{fig:uc2}
 \end{figure}
+
+\paragraph{UC2.A -- Avvio da interfaccia Qt}
+\begin{itemize}
+    \item \textbf{Attore principale:} Operatore.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item L'Operatore preme il pulsante di avvio nell'interfaccia Qt.
+        \item Il sistema esegue il flusso descritto in UC2.
+        \item L'Operatore può seguire l'avanzamento in tempo reale tramite la vista di monitoraggio $\rightarrow$ UC3.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item l'applicazione Qt è disponibile e raggiungibile.
+        \item la configurazione è stata completata $\rightarrow$ UC1.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il piano è disponibile per la consultazione nell'interfaccia Qt $\rightarrow$ UC4.
+    \end{itemize}
+    \item \textbf{Trigger:} l'Operatore avvia manualmente la pianificazione dall'interfaccia grafica.
+\end{itemize}
+
+\paragraph{UC2.B -- Avvio da API HTTP}
+\begin{itemize}
+    \item \textbf{Attore principale:} Sistema ERP.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item Il Sistema ERP invia una richiesta HTTP POST all'endpoint \texttt{/api/planning/run} con i parametri della pianificazione: data di inizio, timeout, modalità di esecuzione del solver (\texttt{use\_remote\_solver}) e altri parametri avanzati facoltativi.
+        \item Il server accetta la richiesta in modo asincrono e risponde immediatamente con HTTP 202 Accepted, restituendo un identificativo univoco del run (\texttt{run\_id}).
+        \item Il sistema esegue il flusso descritto in UC2 in background.
+        \item Il Sistema ERP utilizza il \texttt{run\_id} ricevuto per monitorare lo stato del run $\rightarrow$ UC9.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item il server HTTP è disponibile e raggiungibile.
+        \item il database ERP è accessibile e contiene dati di produzione validi.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il Sistema ERP ha ricevuto il \texttt{run\_id} e la pianificazione è in esecuzione in background.
+        \item l'esecuzione sarà registrata nello storico locale al completamento.
+    \end{itemize}
+    \item \textbf{Trigger:} il Sistema ERP richiede automaticamente la pianificazione tramite l'API di produzione.
+\end{itemize}
 
 \subsubsection{Monitoraggio esecuzione}
 
@@ -603,6 +686,37 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \label{fig:uc8}
 \end{figure}
 
+\subsubsection{Consultazione stato pianificazione via API}
+
+\paragraph{UC9 -- Consultazione stato pianificazione via API}
+\begin{itemize}
+    \item \textbf{Attore principale:} Sistema ERP.
+    \item \textbf{Scenario principale:}
+    \begin{enumerate}
+        \item Il Sistema ERP invia una richiesta HTTP GET all'endpoint \texttt{/api/planning/status/\{run\_id\}} con l'identificativo del run ricevuto in UC2.B.
+        \item Il server restituisce lo stato corrente del run (\texttt{Queued}, \texttt{Running}, \texttt{Finished} o \texttt{Failed}) e i KPI disponibili (makespan, lateness, numero di task schedulati).
+        \item Se il run è ancora in corso, il Sistema ERP ripete la richiesta dopo un intervallo fino al completamento.
+        \item Quando lo stato è \texttt{Finished}, il Sistema ERP elabora i dati del piano ricevuti nella risposta.
+    \end{enumerate}
+    \item \textbf{Precondizioni:}
+    \begin{itemize}
+        \item il server HTTP è disponibile e raggiungibile.
+        \item il Sistema ERP dispone del \texttt{run\_id} ottenuto in UC2.B.
+    \end{itemize}
+    \item \textbf{Postcondizioni:}
+    \begin{itemize}
+        \item il Sistema ERP ha ricevuto lo stato aggiornato e i KPI del run.
+    \end{itemize}
+    \item \textbf{Trigger:} il Sistema ERP vuole verificare l'avanzamento o il completamento di una pianificazione avviata via API.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\columnwidth]{img/usecase/uc9.png}
+    \caption{UC9 -- Consultazione stato pianificazione via API}
+    \label{fig:uc9}
+\end{figure}
+
 \newpage
 
 \section{Tracciamento dei requisiti}
@@ -681,6 +795,14 @@ RFN-17 & Modifica delle priorità operative & UC7 & N \\
 \hline
 RFN-18 & Stima ATP per nuovi ordini & UC8 & N \\
 \hline
+RFN-19 & Selezione della modalità di esecuzione del solver (locale o remota via gRPC) & UC1.4 & N \\
+\hline
+RFN-20 & Avvio della pianificazione da interfaccia Qt & UC2.A & N \\
+\hline
+RFN-21 & Avvio della pianificazione tramite API HTTP da parte del Sistema ERP & UC2.B & N \\
+\hline
+RFN-22 & Consultazione dello stato e dei KPI di un run via API HTTP & UC9 & N \\
+\hline
 
 \caption{Tabella del tracciamento dei requisiti funzionali.}
 \label{tab:requisiti_funzionali}
@@ -741,13 +863,15 @@ RQN-6 & Le esecuzioni devono essere tracciabili nello storico locale & UC6.1, UC
 
 RVN-1 & Il sistema deve essere sviluppato in linguaggio C++ & -- & N \\
 \hline
-RVN-2 & L'interfaccia grafica deve essere realizzata con Qt6 & -- & N \\
+RVN-2 & L'interfaccia grafica di debug e testing deve essere realizzata con Qt6 & -- & N \\
 \hline
 RVN-3 & Il solver di pianificazione deve utilizzare Google OR-Tools & UC2 & N \\
 \hline
 RVN-4 & L'esportazione dei dati deve avvenire in formato JSON & UC5 & N \\
 \hline
 RVN-5 & Lo storico locale deve essere persistito tramite SQLite & UC6.1, UC6.2 & N \\
+\hline
+RVN-6 & L'interfaccia HTTP di produzione deve essere realizzata con il framework Drogon & UC2.B & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti di vincolo.}

@@ -6,7 +6,7 @@
 \section{Tecnologie e strumenti}
 \label{sec:tecnologie-strumenti}
 
-Il sistema è realizzato interamente in C++ ed è articolato in più componenti: un'applicazione desktop Qt, un nucleo di pianificazione condiviso e server opzionali (gRPC, HTTP) per l'integrazione remota. La scelta delle tecnologie è stata orientata da requisiti di prestazione, integrazione con l'ecosistema ERP esistente e supporto alla programmazione a vincoli.
+Il sistema è realizzato interamente in C++ ed è articolato in tre target applicativi che condividono un unico nucleo di pianificazione: un'applicazione desktop Qt usata come strumento di debug e testing durante lo sviluppo, un server HTTP Drogon come interfaccia REST di produzione verso l'ERP e un server gRPC opzionale per delegare la sola fase di calcolo a una macchina dedicata. La scelta delle tecnologie è stata orientata da requisiti di prestazione, integrazione con l'ecosistema ERP esistente e supporto alla programmazione a vincoli.
 
 \subsection{Linguaggi e strumenti di sviluppo}
 \label{subsec:linguaggi}
@@ -17,7 +17,7 @@ C++20 è lo standard ISO del linguaggio C++ adottato nel progetto (requisito RVN
 
 \subsubsection{Qt6}
 
-Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, mantenuto da Qt Group. Qt6 è la versione adottata per la realizzazione dell'interfaccia grafica del sistema (requisito RVN-2). Tra le sue caratteristiche fondamentali per il progetto:
+Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, mantenuto da Qt Group. Qt6 è la versione adottata per il target \texttt{erpai\_ui}, l'applicazione desktop sviluppata principalmente come strumento di debug e testing durante le sessioni di sviluppo. Grazie alla sua interfaccia grafica interattiva, permette di configurare e avviare pianificazioni, visualizzare in tempo reale il diagramma di Gantt, i KPI e i log del solver, e riprodurre scenari di test senza ricorrere alla pipeline HTTP di produzione. Tra le caratteristiche fondamentali di Qt6 per il progetto:
 
 \begin{itemize}
     \item \textbf{Signals \& Slots}: meccanismo di comunicazione tra oggetti che consente di connettere eventi (\textit{signals}) emessi da un oggetto a metodi (\textit{slots}) di un altro, anche tra thread diversi, grazie alle \textit{queued connections} che garantiscono la thread-safety degli aggiornamenti alla UI.
@@ -28,7 +28,7 @@ Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, man
 
 \subsubsection{CMake}
 
-CMake è un sistema di build open source e multipiattaforma che genera file di build nativi (Makefile, Ninja, progetti Visual Studio) a partire da una descrizione dichiarativa in file \texttt{CMakeLists.txt}. Nel progetto CMake gestisce la compilazione dei quattro target principali (\texttt{erpai\_ui}, \texttt{erpai\_daemon}, \texttt{erpai\_grpc\_solver}, \texttt{erpai\_http}) e le dipendenze verso OR-Tools, MariaDB Connector/C++, Qt6 e le librerie gRPC/Protobuf.
+CMake è un sistema di build open source e multipiattaforma che genera file di build nativi (Makefile, Ninja, progetti Visual Studio) a partire da una descrizione dichiarativa in file \texttt{CMakeLists.txt}. Nel progetto CMake gestisce la compilazione dei tre target principali (\texttt{erpai\_ui}, \texttt{erpai\_grpc\_solver}, \texttt{erpai\_http}) e le dipendenze verso OR-Tools, MariaDB Connector/C++, Qt6, Drogon e le librerie gRPC/Protobuf.
 
 \subsection{Librerie}
 \label{subsec:librerie}
@@ -52,7 +52,15 @@ MariaDB Connector/C++ è il driver ufficiale per la connessione a database Maria
 
 \subsubsection{gRPC e Protocol Buffers}
 
-gRPC è un framework open source per chiamate a procedure remote ad alte prestazioni, sviluppato da Google. Utilizza Protocol Buffers come formato di serializzazione dei messaggi. Nel progetto, il file \texttt{solver\_service.proto} definisce il contratto dell'interfaccia del solver remoto: il servizio \texttt{PlanningService} espone un metodo \texttt{RunPlanning} che accetta una configurazione di run e restituisce in streaming gli aggiornamenti di stato. Questo componente consente di eseguire il solver su un server dedicato e di interrogarlo dall'applicazione Qt tramite la classe \texttt{RemoteSolverClient}.
+gRPC è un framework open source per chiamate a procedure remote ad alte prestazioni, sviluppato da Google. Utilizza Protocol Buffers come formato di serializzazione binaria dei messaggi.
+
+Nel progetto, gRPC non è un'interfaccia generica: è l'opzione di deployment che consente di delegare \textbf{esclusivamente la fase di calcolo CP-SAT} a un server dedicato. Il target \texttt{erpai\_grpc\_solver} espone il servizio \texttt{PlanningService} con il metodo \texttt{RunPlanning}, che riceve il modello di scheduling già costruito dal chiamante e ne esegue la risoluzione, restituendo in streaming gli aggiornamenti di stato (KPI, log, soluzione incumbent).
+
+In questo scenario, il modulo chiamante — che sia il server HTTP, il daemon o l'applicazione Qt — continua a eseguire internamente tutte le fasi a monte: caricamento dei dati da MariaDB, costruzione del modello CP-SAT tramite \texttt{ModelBuilder} e orchestrazione del flusso tramite \texttt{PlanningRunner}. La delega al server gRPC riguarda unicamente la parte computazionalmente più onerosa, permettendo di isolarla su una macchina ad alte prestazioni senza modificare la logica applicativa del chiamante. La classe \texttt{RemoteSolverClient} incapsula questa comunicazione in modo trasparente.
+
+\subsubsection{Drogon}
+
+Drogon è un framework C++ per la realizzazione di server HTTP e WebSocket ad alte prestazioni. Nel progetto viene impiegato per il target \texttt{erpai\_http}, l'interfaccia REST di produzione attraverso cui l'applicazione ERP in PHP comunica con il solver. Le route esposte permettono di avviare una pianificazione, leggere il piano risultante e consultare lo storico delle esecuzioni. Grazie alla sua architettura asincrona e non bloccante basata su coroutine, Drogon gestisce richieste concorrenti senza penalizzare il tempo di risposta.
 
 \subsection{Containerizzazione}
 \label{subsec:docker}
@@ -73,16 +81,15 @@ SQLite è una libreria C che implementa un motore di database SQL embedded, senz
 
 Il sistema è progettato attorno a un \textbf{nucleo condiviso} (\texttt{core}) separato da qualsiasi dipendenza verso UI, database o protocollo di comunicazione. Questo nucleo espone \texttt{PlanningRunner} come orchestratore del flusso di pianificazione e \texttt{IPlanningObserver} come punto di estensione per la distribuzione degli eventi.
 
-Quattro target applicativi condividono lo stesso nucleo:
+Tre target applicativi condividono lo stesso nucleo:
 
 \begin{itemize}
-    \item \textbf{erpai\_ui}: applicazione desktop Qt, entry point principale per l'Operatore.
-    \item \textbf{erpai\_daemon}: applicazione console, per esecuzioni headless o da script.
-    \item \textbf{erpai\_grpc\_solver}: server gRPC, per integrazione remota con altri sistemi.
-    \item \textbf{erpai\_http}: server HTTP, alternativa REST-based all'interfaccia gRPC.
+    \item \textbf{erpai\_ui}: applicazione desktop Qt, sviluppata come strumento di debug e testing durante lo sviluppo; fornisce una GUI interattiva per avviare pianificazioni e analizzarne i risultati in tempo reale.
+    \item \textbf{erpai\_http}: server HTTP basato su Drogon, interfaccia REST di produzione per l'integrazione con l'applicazione ERP in PHP.
+    \item \textbf{erpai\_grpc\_solver}: server gRPC opzionale che, se attivo, riceve il modello CP-SAT già costruito dal modulo chiamante ed esegue la sola fase di calcolo su una macchina dedicata.
 \end{itemize}
 
-Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità.
+Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità. In entrambi i casi — che il transport layer sia HTTP o gRPC — il caricamento dei dati, la costruzione del modello e l'orchestrazione del flusso avvengono nel modulo principale; la variabile è solo come e dove viene eseguita la fase di risoluzione CP-SAT.
 
 \subsection{Pipeline di pianificazione}
 \label{subsec:pipeline}
@@ -150,9 +157,8 @@ public:
 \label{listing:observer}
 \end{listing}
 
-Quattro implementazioni concrete dell'interfaccia vengono utilizzate nel progetto:
+Tre implementazioni concrete dell'interfaccia vengono utilizzate nel progetto:
 \begin{itemize}
-    \item \texttt{ConsoleObserver}: stampa gli eventi su stdout, usata dal target daemon.
     \item \texttt{SqliteRunObserver}: persiste i dati del run nello storico SQLite locale.
     \item \texttt{HttpPlanningObserver}: invia callback HTTP al termine di ogni fase.
     \item L'implementazione Qt nel \texttt{PlannerWorker}: traduce le notifiche in segnali Qt, instradati alla UI tramite queued connections.
@@ -219,7 +225,6 @@ Il codice sorgente è organizzato in moduli con responsabilità ben definite, ri
 \begin{minted}{text}
 src/
 +-- apps/
-|   +-- daemon/       # target console (headless)
 |   +-- grpc_server/  # target server gRPC
 |   +-- http/         # target server HTTP REST
 |   +-- ui/           # target applicazione desktop Qt

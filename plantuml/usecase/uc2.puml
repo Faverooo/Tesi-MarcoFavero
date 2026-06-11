@@ -13,12 +13,19 @@ skinparam actor {
 }
 
 actor "Operatore" as op
+actor "Sistema ERP" as erp
 
 rectangle "UC2 - Avvio pianificazione" {
     (UC2\nAvvio\npianificazione) as UC2
+    (UC2.A\nAvvio da\ninterfaccia Qt) as UC2A
+    (UC2.B\nAvvio da\nAPI HTTP) as UC2B
     (UC2.E1\nGestione soluzione\nnon ammissibile) as UC2E1
+
+    UC2A --|> UC2
+    UC2B --|> UC2
+    UC2E1 ..> UC2 : <<extend>>
 }
 
-op --> UC2
-UC2E1 ..> UC2 : <<extend>>
+op --> UC2A
+erp --> UC2B
 @enduml
