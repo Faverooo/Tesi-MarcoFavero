@@ -13,7 +13,7 @@ Il sistema è realizzato interamente in C++ ed è articolato in tre target appli
 
 \subsubsection{C++20}
 
-C++20 è lo standard ISO del linguaggio C++ adottato nel progetto (requisito RVN-1). Rispetto alle versioni precedenti, introduce diverse funzionalità rilevanti per il sistema sviluppato: \texttt{std::optional} per modellare valori nullable provenienti dal database (es. la data di consegna di un ordine), l'attributo \texttt{[[nodiscard]]} per segnalare al compilatore che il valore di ritorno non deve essere ignorato silenziosamente, e le \textit{structured bindings} per iterazioni più espressive su strutture dati. La scelta di C++ come linguaggio principale è dettata anche dalla necessità di integrarsi direttamente con la libreria Google OR-Tools, la cui API nativa è in C++.
+C++20 è lo standard ISO del linguaggio C++ adottato nel progetto (requisito RVN-1). La scelta di C++ come linguaggio principale è dettata anche dalla necessità di integrarsi direttamente con la libreria Google OR-Tools, la cui API nativa è in C++.
 
 \subsubsection{Qt6}
 
@@ -23,7 +23,7 @@ Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, man
     \item \textbf{Signals \& Slots}: meccanismo di comunicazione tra oggetti che consente di connettere eventi (\textit{signals}) emessi da un oggetto a metodi (\textit{slots}) di un altro, anche tra thread diversi, grazie alle \textit{queued connections} che garantiscono la thread-safety degli aggiornamenti alla UI.
     \item \textbf{QThread e pattern worker}: permettono di eseguire operazioni lunghe in background senza bloccare il thread principale della UI, pattern fondamentale per integrare il solver CP-SAT nell'applicazione desktop.
     \item \textbf{Widget predefiniti}: \texttt{QTableWidget}, \texttt{QPlainTextEdit}, \texttt{QSplitter} e altri componenti grafici standard usati per costruire le viste di configurazione, monitoraggio e risultati.
-    \item \textbf{QPainter}: API di disegno vettoriale 2D, impiegata per il rendering personalizzato del diagramma di Gantt nella classe \texttt{GanttWidget}.
+    \item \textbf{QPainter}: classe per il disegno vettoriale 2D, impiegata per il rendering personalizzato del diagramma di Gantt nella classe \texttt{GanttWidget}.
 \end{itemize}
 
 \subsubsection{CMake}
@@ -56,7 +56,7 @@ gRPC è un framework open source per chiamate a procedure remote ad alte prestaz
 
 Nel progetto, gRPC non è un'interfaccia generica: è l'opzione di deployment che consente di delegare \textbf{esclusivamente la fase di calcolo CP-SAT} a un server dedicato. Il target \texttt{erpai\_grpc\_solver} espone il servizio \texttt{PlanningService} con il metodo \texttt{RunPlanning}, che riceve il modello di scheduling già costruito dal chiamante e ne esegue la risoluzione, restituendo in streaming gli aggiornamenti di stato (KPI, log, soluzione incumbent).
 
-In questo scenario, il modulo chiamante — che sia il server HTTP, il daemon o l'applicazione Qt — continua a eseguire internamente tutte le fasi a monte: caricamento dei dati da MariaDB, costruzione del modello CP-SAT tramite \texttt{ModelBuilder} e orchestrazione del flusso tramite \texttt{PlanningRunner}. La delega al server gRPC riguarda unicamente la parte computazionalmente più onerosa, permettendo di isolarla su una macchina ad alte prestazioni senza modificare la logica applicativa del chiamante. La classe \texttt{RemoteSolverClient} incapsula questa comunicazione in modo trasparente.
+In questo scenario, il modulo chiamante --- che sia il server HTTP, il daemon o l'applicazione Qt --- continua a eseguire internamente tutte le fasi a monte: caricamento dei dati da MariaDB, costruzione del modello CP-SAT tramite \texttt{ModelBuilder} e orchestrazione del flusso tramite \texttt{PlanningRunner}. La delega al server gRPC riguarda unicamente la parte computazionalmente più onerosa, permettendo di isolarla su una macchina ad alte prestazioni senza modificare la logica applicativa del chiamante. La classe \texttt{RemoteSolverClient} incapsula questa comunicazione in modo trasparente.
 
 \subsubsection{Drogon}
 
@@ -74,7 +74,7 @@ Docker è una piattaforma open source per la containerizzazione di applicazioni.
 
 \subsubsection{SQLite}
 
-SQLite è una libreria C che implementa un motore di database SQL embedded, senza necessità di un server separato. Nel progetto viene impiegata per la persistenza dello storico locale delle pianificazioni (requisito RVN-5). La classe \texttt{LocalRunStore} gestisce un file \texttt{.db} nella directory dell'eseguibile, creando e mantenendo le tabelle \texttt{runs}, \texttt{run\_logs} e \texttt{run\_tasks} attraverso le API C di SQLite. La scelta di SQLite garantisce leggerezza, portabilità e assenza di dipendenze esterne lato client.
+SQLite è una libreria C che implementa un motore di database \gls{sql} embedded, senza necessità di un server separato. Nel progetto viene impiegata per la persistenza dello storico locale delle pianificazioni (requisito RVN-5). La classe \texttt{LocalRunStore} gestisce un file \texttt{.db} nella directory dell'eseguibile, creando e mantenendo le tabelle \texttt{runs}, \texttt{run\_logs} e \texttt{run\_tasks} attraverso le API C di SQLite. La scelta di SQLite garantisce leggerezza, portabilità e assenza di dipendenze esterne lato client.
 
 \section{Architettura del sistema}
 \label{sec:architettura}
@@ -84,12 +84,12 @@ Il sistema è progettato attorno a un \textbf{nucleo condiviso} (\texttt{core}) 
 Tre target applicativi condividono lo stesso nucleo:
 
 \begin{itemize}
-    \item \textbf{erpai\_ui}: applicazione desktop Qt, sviluppata come strumento di debug e testing durante lo sviluppo; fornisce una GUI interattiva per avviare pianificazioni e analizzarne i risultati in tempo reale.
+    \item \textbf{erpai\_ui}: applicazione desktop Qt, sviluppata come strumento di debug e testing durante lo sviluppo; fornisce una \gls{gui} interattiva per avviare pianificazioni e analizzarne i risultati in tempo reale.
     \item \textbf{erpai\_http}: server HTTP basato su Drogon, interfaccia REST di produzione per l'integrazione con l'applicazione ERP in PHP.
     \item \textbf{erpai\_grpc\_solver}: server gRPC opzionale che, se attivo, riceve il modello CP-SAT già costruito dal modulo chiamante ed esegue la sola fase di calcolo su una macchina dedicata.
 \end{itemize}
 
-Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità. In entrambi i casi — che il transport layer sia HTTP o gRPC — il caricamento dei dati, la costruzione del modello e l'orchestrazione del flusso avvengono nel modulo principale; la variabile è solo come e dove viene eseguita la fase di risoluzione CP-SAT.
+Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità. In entrambi i casi --- che il transport layer sia HTTP o gRPC --- il caricamento dei dati, la costruzione del modello e l'orchestrazione del flusso avvengono nel modulo principale; la variabile è solo come e dove viene eseguita la fase di risoluzione CP-SAT.
 
 \subsection{Pipeline di pianificazione}
 \label{subsec:pipeline}
@@ -97,9 +97,8 @@ Questa separazione garantisce che la logica di pianificazione possa essere testa
 Il flusso di esecuzione di una pianificazione segue le fasi descritte di seguito.
 
 \begin{enumerate}
-    \item \textbf{Caricamento dati} (\texttt{MrpDataLoader}): carica da MariaDB gli ordini di produzione, le fasi di lavorazione, le macchine, i calendari lavorativi per macchina e le impostazioni MRP.
+    \item \textbf{Caricamento dati} (\texttt{MrpDataLoader}): carica da MariaDB gli ordini di produzione, le fasi di lavorazione, le macchine, i calendari lavorativi per macchina e le impostazioni \gls{mrp}.
     \item \textbf{Costruzione task} (\texttt{PlanningInput}): trasforma i record di database in strutture \texttt{TaskData} con durata calcolata (\texttt{setup\_seconds + qta $\times$ unit\_seconds}) e relazioni di precedenza tra fasi dello stesso job, derivate dal \texttt{phase\_number}.
-    \item \textbf{Pre-processing MRP} (\texttt{BomRecursion}, \texttt{ForecastBatching}): applica la ricorsione sulla distinta base e raggruppa i lotti di previsione in entità pianificabili.
     \item \textbf{Costruzione modello CP-SAT} (\texttt{ModelBuilder}): crea per ogni task le variabili CP-SAT (\texttt{IntVar start}, \texttt{IntVar end}, \texttt{IntervalVar interval}), aggiunge i vincoli di non sovrapposizione per macchina, i vincoli di capacità cumulativa per gruppo macchina, le precedenze tra fasi e i vincoli di calendario lavorativo giornaliero.
     \item \textbf{Risoluzione} (\texttt{TwoPhaseSolver}): esegue la pipeline a due fasi descritta nella sezione~\ref{subsec:twophase}.
     \item \textbf{Estrazione risultati} (\texttt{ResultExtractor}): converte la soluzione CP-SAT in strutture \texttt{ScheduledTaskInfo} con inizio e fine in data/ora assoluta.
@@ -113,7 +112,7 @@ Il \texttt{TwoPhaseSolver} implementa una pipeline di risoluzione a due fasi per
 
 \begin{itemize}
     \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode::Phase1Light}), senza i vincoli di calendario più stringenti. Produce una soluzione iniziale in tempi brevi.
-    \item \textbf{Hinting}: la soluzione della fase 1 viene estratta tramite \texttt{SolutionHintBuilder} e iniettata come suggerimento (\textit{warm start}) nel modello completo, guidando il solver verso la regione dello spazio di ricerca più promettente.
+    \item \textbf{Hinting}: la soluzione della fase 1 viene estratta tramite \texttt{SolutionHintBuilder} e iniettata come suggerimento (\gls{warmstart}) nel modello completo, guidando il solver verso la regione dello spazio di ricerca più promettente.
     \item \textbf{Fase 2 (Full)}: ottimizza sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce calendari giornalieri per macchina, vincoli di capacità cumulativa e funzione obiettivo multi-criterio (lateness totale dei job + makespan come criterio secondario).
 \end{itemize}
 
@@ -247,7 +246,7 @@ src/
 \label{listing:struttura}
 \end{listing}
 
-La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il principio di dipendenza unidirezionale: le applicazioni dipendono dal core, il core non dipende da nessuna applicazione. In questo modo è possibile aggiungere nuovi target (es. un client CLI) senza modificare la logica di pianificazione.
+La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il principio di dipendenza unidirezionale: le applicazioni dipendono dal core, il core non dipende da nessuna applicazione. In questo modo è possibile aggiungere nuovi target (es. un client \gls{cli}) senza modificare la logica di pianificazione.
 
 \section{Componenti principali}
 \label{sec:componenti}

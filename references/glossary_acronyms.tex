@@ -1,33 +1,110 @@
-% Acronyms
-\newacronym{api}{API}{Application Program Interface}
-\newacronym{sdk}{SDK}{Software Development Kit}
+% ==========================================================
+% Acronimi e abbreviazioni
+% ==========================================================
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{atp}{ATP}{Available-To-Promise}
+\newacronym{bom}{BOM}{Bill Of Materials}
+\newacronym{ci}{CI}{Continuous Integration}
+\newacronym{cli}{CLI}{Command Line Interface}
+\newacronym{cpsat}{CP-SAT}{Constraint Programming -- Satisfiability}
+\newacronym{erp}{ERP}{Enterprise Resource Planning}
+\newacronym{grpc}{gRPC}{gRPC Remote Procedure Call}
+\newacronym{gui}{GUI}{Graphical User Interface}
+\newacronym{http}{HTTP}{HyperText Transfer Protocol}
+\newacronym{json}{JSON}{JavaScript Object Notation}
+\newacronym{kpi}{KPI}{Key Performance Indicator}
+\newacronym{mrp}{MRP}{Material Requirements Planning}
+\newacronym{orm}{ORM}{Object-Relational Mapping}
+\newacronym{rest}{REST}{REpresentational State Transfer}
+\newacronym{sql}{SQL}{Structured Query Language}
 \newacronym{uml}{UML}{Unified Modeling Language}
-\newacronym{tsa}{TSA}{Termine solo acronimo}
 
-% Glossary
+% ==========================================================
+% Glossario
+% ==========================================================
 \newglossaryentry{apig}{
     name={API},
-    text={Application Program Interface},
+    text={API},
     sort=api,
-    description={In informatics, an API is a set of procedures available to programmers, typically grouped to form a toolkit for a specific task within a program. Its purpose is to provide an abstraction, usually between hardware and the programmer or between low-level and high-level software, simplifying the programming process}
-}
-
-\newglossaryentry{sdkg}{
-    name={SDK},
-    text={Software Development Kit},
-    sort=sdk,
-    description={A Software Development Kit (SDK) is a collection of development tools in one installable package, facilitating application creation by providing a compiler, debugger, and sometimes a software framework. SDKs are typically specific to a hardware platform and operating system combination. Many application developers use specific SDKs to enable advanced functionalities such as advertisements, push notifications, etc}
+    description={Un'API (Application Programming Interface) è un insieme di procedure messe a disposizione del programmatore, tipicamente raggruppate a formare un insieme di strumenti specifici per un determinato compito. Il suo scopo è fornire un'astrazione, di norma tra l'hardware e il programmatore o tra software di basso e di alto livello, semplificando il lavoro di programmazione}
 }
 
 \newglossaryentry{umlg}{
     name={UML},
-    text={Unified Modeling Language},
+    text={UML},
     sort=uml,
-    description={In software engineering, Unified Modeling Language (UML) is a modeling and specification language based on the object-oriented paradigm. UML serves as a "lingua franca" in the object-oriented design and programming community. Much of the industry literature uses UML to describe analytical and design solutions in a concise and understandable way for a broad audience}
+    description={Nell'ingegneria del software, l'Unified Modeling Language (UML) è un linguaggio di modellazione e specifica basato sul paradigma a oggetti. UML è impiegato come ``lingua franca'' nella comunità della progettazione e della programmazione orientata agli oggetti per descrivere in modo conciso soluzioni analitiche e di progetto}
 }
 
-\newglossaryentry{TermineSenzaAcronimo}{
-    name={Nome del termine},
-    sort=termine senza acronimo,
-    description={Descrizione}
+\newglossaryentry{solver}{
+    name={solver},
+    sort=solver,
+    description={Componente software che risolve un problema di ottimizzazione o di soddisfacimento di vincoli, individuando una soluzione ottimale o ammissibile a partire da un modello matematico del problema}
+}
+
+\newglossaryentry{makespan}{
+    name={makespan},
+    sort=makespan,
+    description={In ambito di scheduling, è l'istante di completamento dell'ultimo task pianificato, ovvero la durata complessiva del piano di produzione. Minimizzare il makespan significa ridurre il tempo totale necessario a completare tutte le lavorazioni}
+}
+
+\newglossaryentry{lateness}{
+    name={lateness},
+    sort=lateness,
+    description={In ambito di scheduling, è la differenza tra l'istante di completamento di un task e la relativa data di consegna. Un valore positivo indica un ritardo rispetto alla scadenza, un valore negativo un anticipo}
+}
+
+\newglossaryentry{gantt}{
+    name={diagramma di Gantt},
+    text={diagramma di Gantt},
+    sort=gantt,
+    description={Strumento di rappresentazione grafica di un piano di attività, in cui ciascun task è disegnato come una barra orizzontale la cui posizione e lunghezza indicano rispettivamente l'istante di inizio e la durata sulla linea temporale}
+}
+
+\newglossaryentry{changeover}{
+    name={changeover},
+    sort=changeover,
+    description={Tempo di attrezzaggio (setup) necessario a riconfigurare una macchina per passare dalla lavorazione di un articolo a quella di un articolo diverso. Costituisce un costo da minimizzare nella sequenziazione delle lavorazioni}
+}
+
+\newglossaryentry{warmstart}{
+    name={warm start},
+    sort=warm start,
+    description={Tecnica con cui si fornisce al solver una soluzione iniziale di partenza (\textit{hint}), così da guidarne la ricerca verso le regioni più promettenti dello spazio delle soluzioni e accelerarne la convergenza}
+}
+
+\newglossaryentry{incumbent}{
+    name={incumbent},
+    sort=incumbent,
+    description={Migliore soluzione ammissibile trovata dal solver in un dato istante del processo di ottimizzazione, soggetta a essere sostituita da soluzioni migliori nel prosieguo della ricerca}
+}
+
+\newglossaryentry{scrum}{
+    name={Scrum},
+    sort=scrum,
+    description={Framework di sviluppo Agile che organizza il lavoro in cicli iterativi di durata fissa (\textit{sprint}), con ruoli, eventi e artefatti definiti volti a favorire la collaborazione e il rilascio incrementale del prodotto}
+}
+
+\newglossaryentry{sprint}{
+    name={sprint},
+    sort=sprint,
+    description={Nel framework Scrum, intervallo di tempo di durata prefissata al termine del quale viene rilasciato un incremento del prodotto potenzialmente utilizzabile}
+}
+
+\newglossaryentry{kanban}{
+    name={Kanban},
+    sort=kanban,
+    description={Metodo di gestione visuale del lavoro basato su una lavagna suddivisa in colonne che rappresentano gli stati di avanzamento delle attività, utile a limitare il lavoro in corso e a evidenziare i colli di bottiglia}
+}
+
+\newglossaryentry{gitflow}{
+    name={GitFlow},
+    sort=gitflow,
+    description={Modello di organizzazione dei rami di un repository Git che separa lo sviluppo delle funzionalità, la preparazione delle release e le correzioni urgenti in rami dedicati (\textit{main}, \textit{develop}, \textit{feature}, \textit{release}, \textit{hotfix})}
+}
+
+\newglossaryentry{distintabase}{
+    name={distinta base},
+    sort=distinta base,
+    description={Elenco strutturato e gerarchico dei componenti, dei semilavorati e delle materie prime necessari a realizzare un prodotto finito, con le relative quantità (in inglese \textit{Bill of Materials})}
 }

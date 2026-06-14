@@ -9,7 +9,7 @@ Durante il periodo di stage ho collaborato con un team composto da tre persone. 
 
 \subsection{Modello Agile}
 
-L'azienda adotta il framework Scrum come metodologia di sviluppo Agile, organizzando il lavoro in sprint della durata di una settimana.
+L'azienda adotta il framework \gls{scrum} come metodologia di sviluppo Agile, organizzando il lavoro in \gls{sprint} della durata di una settimana.
 
 All'inizio di ogni sprint viene svolta una riunione di pianificazione alla quale partecipa anche il cliente. Durante questo incontro vengono raccolti i nuovi requisiti, valutati gli avanzamenti del progetto e definite le attività da svolgere nella settimana successiva. I compiti vengono quindi distribuiti tra i membri del team in base alle competenze e alle priorità individuate.
 
@@ -28,7 +28,7 @@ Il \textit{Development Team} è composto da tutti i membri del gruppo di lavoro,
 
 \subsection{Issue Tracking, Version Control e Code Review}
 
-Per la gestione delle attività di sviluppo, l'azienda utilizza Plane come sistema di \textit{issue tracking}. Le attività vengono organizzate attraverso board in stile Kanban e assegnate ai membri del team in base alle competenze e alle priorità definite durante le riunioni di pianificazione degli sprint.
+Per la gestione delle attività di sviluppo, l'azienda utilizza Plane come sistema di \textit{issue tracking}. Le attività vengono organizzate attraverso board in stile \gls{kanban} e assegnate ai membri del team in base alle competenze e alle priorità definite durante le riunioni di pianificazione degli sprint.
 
 I task sono inoltre raggruppati in moduli corrispondenti alle diverse aree del progetto, facilitando la suddivisione del lavoro e il monitoraggio dell'avanzamento delle varie componenti applicative. In accordo con il cliente, vengono inoltre stabilite specifiche milestone che scandiscono il rilascio progressivo delle funzionalità previste.
 
@@ -36,7 +36,7 @@ Per il controllo di versione del codice sorgente viene utilizzato Git, con repos
 
 A supporto di questo processo viene inoltre impiegato un sistema automatizzato di revisione del codice basato su intelligenza artificiale, in grado di individuare potenziali problematiche, evidenziare possibili miglioramenti e contribuire al mantenimento della qualità del codice.
 
-Il flusso di sviluppo adottato segue il modello \textit{GitFlow}, articolato nei seguenti rami principali:
+Il flusso di sviluppo adottato segue il modello \gls{gitflow}, articolato nei seguenti rami principali:
 
 \begin{itemize}
     \item \textbf{main}: contiene il codice stabile e pronto per il rilascio in produzione;
@@ -57,11 +57,11 @@ Il flusso di sviluppo adottato segue il modello \textit{GitFlow}, articolato nei
 
 Come anticipato, il progetto proposto dal cliente presenta un elevato livello di complessità e richiede uno sviluppo continuativo che coinvolge il team da diversi mesi. L'attività svolta durante il periodo di stage si è concentrata in particolare sullo sviluppo del \textit{solver di scheduling}, ovvero il componente software responsabile della risoluzione di problemi di ottimizzazione legati alla pianificazione delle attività e all'allocazione delle risorse disponibili.
 
-Il solver costituisce il nucleo computazionale del sistema e ha il compito di individuare soluzioni ottimali o quasi ottimali nel rispetto di un insieme di vincoli definiti dal dominio applicativo. Per consentirne l'integrazione con l'applicazione principale — realizzata in PHP — il modulo è esposto tramite un'API REST sviluppata con il framework Drogon, che rappresenta l'interfaccia di produzione principale: riceve la richiesta di pianificazione, esegue l'intero flusso (caricamento dati ERP, costruzione del modello, risoluzione) e restituisce il piano al chiamante.
+Il solver,sviluppato in C++, costituisce il nucleo computazionale del sistema e ha il compito di individuare soluzioni ottimali o quasi ottimali nel rispetto di un insieme di vincoli definiti dal dominio applicativo. Per consentirne l'integrazione con l'applicazione principale --- realizzata in PHP --- il modulo è esposto tramite un'API REST sviluppata con il framework Drogon, che rappresenta l'interfaccia di produzione principale: riceve la richiesta di pianificazione, esegue l'intero flusso (caricamento dati ERP, costruzione del modello, risoluzione) e restituisce il piano al chiamante.
 
-Parallelamente allo sviluppo del modulo, durante lo stage è stata realizzata un'applicazione desktop basata su Qt con finalità di debug e testing. Grazie alla sua interfaccia grafica interattiva, questo strumento ha permesso di visualizzare in tempo reale il diagramma di Gantt, i KPI e i log del solver durante le sessioni di sviluppo, facilitando l'individuazione di anomalie e velocizzando le iterazioni implementative.
+Parallelamente allo sviluppo del modulo, durante lo stage è stata realizzata un'applicazione desktop basata su Qt con finalità di debug e testing. Grazie alla sua interfaccia grafica interattiva, questo strumento ha permesso di visualizzare in tempo reale il \gls{gantt}, i \gls{kpi} e i log del solver durante le sessioni di sviluppo, facilitando l'individuazione di anomalie e velocizzando le iterazioni implementative.
 
-Il sistema prevede inoltre la possibilità di delegare la sola fase di calcolo CP-SAT a un server dedicato tramite gRPC: in questo scenario il modulo principale continua a occuparsi del caricamento dei dati, della costruzione del modello e dell'orchestrazione del flusso, delegando unicamente la risoluzione al server remoto.
+Il sistema prevede inoltre la possibilità di delegare la sola fase di calcolo \gls{cpsat} a un server dedicato tramite \gls{grpc}: in questo scenario il modulo principale continua a occuparsi del caricamento dei dati, della costruzione del modello e dell'orchestrazione del flusso, delegando unicamente la risoluzione al server remoto.
 
 La scelta del linguaggio C++ per l'implementazione del solver è stata motivata dalle elevate prestazioni offerte e dall'efficienza nella gestione di strutture dati e algoritmi complessi. Queste caratteristiche risultano particolarmente importanti in un contesto di scheduling, nel quale è necessario affrontare problemi di ottimizzazione di grandi dimensioni e caratterizzati da numerosi vincoli.
 
@@ -98,7 +98,7 @@ Si è quindi proceduto a elaborare delle possibili soluzioni per far fronte a ta
 \end{risk}
 
 \begin{risk}{Instabilità o ambiguità nella logica di stima ATP}
-    \riskdescription{L'introduzione della logica di stima Available To Promise (ATP) risente fortemente delle repentine modifiche manuali alle priorità operative, rischiando di restituire date di disponibilità indicative non stabili o di difficile validazione}
+    \riskdescription{L'introduzione della logica di stima \gls{atp} risente fortemente delle repentine modifiche manuali alle priorità operative, rischiando di restituire date di disponibilità indicative non stabili o di difficile validazione}
     \risksolution{Circoscrizione della logica ATP a uno scenario deterministico ben definito e semplificato per il prototipo. Eventuali casi limite non gestiti o comportamenti dinamici complessi verranno formalmente documentati nella relazione finale come evoluzioni future del progetto}
     \label{risk:stabilita-atp} 
 \end{risk}

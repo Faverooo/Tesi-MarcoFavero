@@ -3,7 +3,7 @@
 
 \section{Analisi degli utenti}
 
-Il sistema sviluppato nel contesto dello stage è un modulo di schedulazione C++ che espone la propria logica attraverso due interfacce principali: un'applicazione desktop basata su Qt (\texttt{erpai\_ui}), utilizzata per configurare, avviare e analizzare le pianificazioni durante lo sviluppo e il testing, e un server HTTP basato su Drogon (\texttt{erpai\_http}), attraverso cui il sistema gestionale ERP in PHP integra il solver in produzione.
+Il sistema sviluppato nel contesto dello stage è un modulo di schedulazione C++ che espone la propria logica attraverso due interfacce principali: un'applicazione desktop basata su Qt (\texttt{erpai\_ui}), utilizzata per configurare, avviare e analizzare le pianificazioni durante lo sviluppo e il testing, e un server \gls{http} basato su Drogon (\texttt{erpai\_http}), attraverso cui il sistema gestionale \gls{erp} in PHP integra il solver in produzione.
 
 Il sistema riconosce due attori:
 
@@ -97,7 +97,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item UC4.3 -- Analisi qualità del piano
     \end{itemize}
 
-    \item \textbf{UC5 -- Esportazione piano in formato JSON}
+    \item \textbf{UC5 -- Esportazione piano in formato \gls{json}}
 
     \item \textbf{UC6 -- Gestione storico pianificazioni}
     \begin{itemize}
@@ -380,7 +380,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
         \item L'Operatore accede alla sezione KPI.
-        \item L'Operatore analizza gli indicatori di prestazione aggiornati: makespan, lateness totale e numero di task schedulati.
+        \item L'Operatore analizza gli indicatori di prestazione aggiornati: \gls{makespan}, \gls{lateness} totale e numero di task schedulati.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
@@ -401,7 +401,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
         \item L'Operatore accede alla sezione telemetria.
-        \item L'Operatore osserva l'andamento temporale dell'esecuzione, inclusi i valori di incumbent, bound e gap forniti dal solver.
+        \item L'Operatore osserva l'andamento temporale dell'esecuzione, inclusi i valori di \gls{incumbent}, bound e gap forniti dal solver.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
@@ -664,7 +664,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
         \item L'Operatore inserisce i parametri del nuovo ordine da valutare.
-        \item Il sistema calcola la stima di ATP (\textit{Available-To-Promise}) a partire dal piano disponibile.
+        \item Il sistema calcola la stima di \gls{atp} a partire dal piano disponibile.
         \item L'Operatore riceve l'intervallo temporale stimato per l'inserimento del nuovo ordine.
     \end{enumerate}
     \item \textbf{Precondizioni:}

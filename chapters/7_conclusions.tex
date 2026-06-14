@@ -2,33 +2,131 @@
 \label{chap:conclusioni}
 
 \section{Consuntivo finale}
-Esempio di aggiunta di un termine con glossario e acronimo:\\
-Lorem \gls{sdk} ispum dolor.
+\label{sec:consuntivo}
 
-Nel successivo utilizzo, apparirà solo l'acronimo:\\
-Lorem \gls{sdk}.
+Lo stage si è svolto presso Spazio Dev S.r.l. per una durata complessiva di 300 ore, secondo la pianificazione settimanale concordata nel piano di lavoro. Le attività si sono articolate nelle otto settimane previste, con una distribuzione delle ore coerente con quanto stimato inizialmente.
 
-Nel caso si voglia invece mettere solo il termine per esteso, si può usare:\\
-Lorem \gls{sdkg}.
+La prima settimana è stata dedicata all'analisi del contesto produttivo aziendale e alla configurazione dell'ambiente di sviluppo, con particolare attenzione alla comprensione del funzionamento del gestionale ERP e dei reparti pilota. Le settimane successive hanno seguito progressivamente la costruzione del sistema: modellazione dei dati, implementazione della logica di schedulazione CP-SAT, sviluppo dell'interfaccia Qt, integrazione dell'API HTTP e implementazione della stima ATP. Le ultime due settimane sono state dedicate alla rifinitura del codice, all'attività di testing, alla validazione con il tutor aziendale e alla redazione della presente relazione.
+
+In generale, le attività previste sono state completate nei tempi concordati. L'unica attività che ha richiesto un impegno superiore alle stime iniziali è stata l'implementazione del modello CP-SAT: la complessità dei vincoli di precedenza tra fasi, la gestione del calendario lavorativo e l'integrazione dei costi di attrezzaggio hanno richiesto iterazioni di progettazione e testing più estese del previsto. Questo ha comportato una riduzione del tempo disponibile per alcune funzionalità facoltative, come descritto nella sezione successiva.
 
 \section{Raggiungimento degli obiettivi}
-Esempio di termine con solo acronimo\\
-Lorem \gls{tsa}, ipsum dolor sit amet
+\label{sec:raggiungimento-obiettivi}
 
-termine costruito senza acronimo:
-Lorem \gls{TermineSenzaAcronimo}, ipsum dolor sit amet
+Gli obiettivi dello stage sono stati classificati nel piano di lavoro in tre categorie: obbligatori (O), desiderabili (D) e facoltativi (F). Le tabelle seguenti riportano lo stato di raggiungimento di ciascun obiettivo.
+
+\subsection{Obiettivi obbligatori}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{1.2cm}|p{8.8cm}|p{2.0cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Obiettivo}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Stato}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+O01 & Analizzare i requisiti del dominio produttivo e implementare un prototipo di schedulazione dettagliata per un sottoinsieme di reparti e vincoli & Raggiunto \\
+\hline
+O02 & Realizzare un'interfaccia applicativa per visualizzare il piano di produzione e supportare modifiche manuali controllate & Raggiunto \\
+\hline
+O03 & Implementare una stima ATP semplificata, validare il prototipo con casi di test e produrre documentazione tecnica e finale & Raggiunto \\
+\hline
+
+\caption{Stato degli obiettivi obbligatori.}
+\label{tab:obiettivi_obbligatori}
+\end{longtable}
+\end{center}
+
+Tutti e tre gli obiettivi obbligatori sono stati raggiunti. Il prototipo di schedulazione implementa un modello CP-SAT completo con vincoli di non sovrapposizione, capacità dei gruppi macchina, precedenze tra fasi, calendari lavorativi e costi di attrezzaggio. L'interfaccia Qt fornisce le viste di configurazione, monitoraggio, analisi dei risultati e gestione dello storico. La stima ATP è stata implementata come funzionalità dedicata all'interno dell'interfaccia Qt, e la suite di test automatizzati insieme alla validazione con il tutor aziendale costituisce il piano di validazione previsto dall'obiettivo O03.
+
+\subsection{Obiettivi desiderabili}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{1.2cm}|p{8.8cm}|p{2.0cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Obiettivo}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Stato}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+D01 & Introdurre indicatori base sul carico delle risorse e sugli ordini potenzialmente in ritardo & Raggiunto \\
+\hline
+D02 & Aggiungere filtri, ordinamenti o piccole funzionalità di esportazione per facilitare l'analisi del piano & Raggiunto \\
+\hline
+D03 & Predisporre dati di esempio e scenari di test riutilizzabili per future estensioni del progetto & Raggiunto \\
+\hline
+
+\caption{Stato degli obiettivi desiderabili.}
+\label{tab:obiettivi_desiderabili}
+\end{longtable}
+\end{center}
+
+Anche tutti gli obiettivi desiderabili sono stati raggiunti. La vista di monitoraggio espone in tempo reale i KPI di carico (makespan, lateness totale, numero di job in ritardo), l'esportazione JSON del piano è disponibile dall'interfaccia Qt, e la suite di test nella cartella \texttt{tests/} costituisce una raccolta di scenari riutilizzabili per future estensioni.
+
+\subsection{Obiettivi facoltativi}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{1.2cm}|p{8.8cm}|p{2.0cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Obiettivo}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Stato}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+F01 & Evidenziare visivamente conflitti o sovraccarichi nelle viste di pianificazione & Raggiunto \\
+\hline
+F02 & Introdurre una semplice simulazione ``what-if'' su priorità o date di inserimento ordine & Non raggiunto \\
+\hline
+F03 & Preparare una schermata riepilogativa con KPI essenziali per il monitoraggio del prototipo & Raggiunto \\
+\hline
+
+\caption{Stato degli obiettivi facoltativi.}
+\label{tab:obiettivi_facoltativi}
+\end{longtable}
+\end{center}
+
+Degli obiettivi facoltativi, F01 e F03 sono stati raggiunti: il diagramma di Gantt evidenzia visivamente i task in ritardo e la vista di analisi qualità espone i KPI essenziali in forma riepilogativa. L'obiettivo F02 (simulazione what-if) non è stato realizzato a causa del tempo ridotto disponibile nelle ultime settimane, impiegato principalmente per la rifinitura dei vincoli del modello CP-SAT e per la sessione di validazione finale.
 
 \section{Conoscenze acquisite}
-Lorem Ipsum dolor Lorem \gls{api}
+\label{sec:conoscenze}
 
-Lorem Ipsum dolor Lorem \gls{apig}
+Lo stage ha rappresentato un'occasione di apprendimento su diversi fronti, sia tecnici che metodologici.
 
-Si può consultare il file \textit{glossary\_acronyms.tex} per alcuni esempi.
+Sul piano tecnico, la conoscenza più significativa acquisita riguarda la \textbf{programmazione a vincoli} e l'utilizzo del solver \textbf{CP-SAT} di Google OR-Tools. Prima dello stage, la familiarità con l'ottimizzazione combinatoria era principalmente teorica; l'esperienza pratica di modellare un problema di job shop flessibile con vincoli eterogenei (capacità, precedenze, calendari, changeover) ha fornito una comprensione concreta delle difficoltà e delle scelte di modellazione che non emergono dalla sola teoria.
+
+In secondo luogo, lo sviluppo in \textbf{C++20} in un contesto industriale ha consolidato la padronanza di funzionalità moderne del linguaggio come \texttt{std::optional}, \texttt{[[nodiscard]]} e le \textit{structured bindings}, nonché delle pratiche di gestione della concorrenza richieste per integrare un calcolo pesante in un'applicazione interattiva Qt.
+
+L'utilizzo del framework \textbf{Qt6} ha introdotto al pattern di comunicazione Signals \& Slots e al threading con \texttt{QThread}, strumenti fondamentali per costruire interfacce reattive che non si bloccano durante operazioni lunghe. Analogamente, la familiarizzazione con \textbf{Drogon} ha offerto una prima esperienza pratica con i framework HTTP asincroni in C++, un ambito relativamente insolito rispetto ai framework web più comuni in altri linguaggi.
+
+Sul piano metodologico, lo stage ha consolidato l'abitudine a lavorare seguendo un piano strutturato con revisioni periodiche, a documentare le scelte implementative in modo che siano comprensibili a terzi, e a scrivere test automatizzati sin dalle prime fasi di sviluppo anziché a posteriori. Quest'ultimo punto in particolare ha dimostrato il suo valore nel momento in cui le modifiche al modello CP-SAT nelle settimane successive hanno potuto essere verificate rapidamente senza regressioni.
 
 \section{Valutazione personale}
+\label{sec:valutazione}
 
+L'esperienza di stage si è rivelata complessivamente molto positiva e formativa. Lavorare su un problema reale --- la pianificazione della produzione di un'azienda manifatturiera --- ha dato concretezza alle competenze acquisite durante il percorso universitario, in particolare quelle legate all'ingegneria del software e agli algoritmi. La consapevolezza che il piano prodotto dal solver avrebbe potuto essere effettivamente utilizzato per organizzare il lavoro di operatori in un reparto produttivo ha reso il lavoro più motivante rispetto a un progetto puramente accademico.
 
-\section{Valutazione personale}
+Il contesto aziendale di Spazio Dev S.r.l. si è rivelato stimolante: le dimensioni contenute dell'organizzazione hanno permesso di avere visibilità sull'intero stack tecnologico del prodotto --- dal database SQL alle interfacce ERP --- e di interagire direttamente con il tutor aziendale con una frequenza che ha accelerato notevolmente la comprensione del dominio.
 
+La difficoltà principale incontrata è stata la complessità del dominio di schedulazione: le regole di business che governano una produzione reale sono molto più articolate di quanto appaia in prima analisi, e una parte significativa del tempo è stata dedicata a comprendere sfumature del problema (come la gestione dei calendari con finestre discontinue o la semantica dei costi di attrezzaggio) che non sono documentate in nessun manuale. Questa difficoltà è stata però anche la fonte di apprendimento più ricca dello stage.
+
+In prospettiva, le funzionalità sviluppate costituiscono una base solida su cui l'azienda potrà continuare a lavorare: l'architettura a nucleo condiviso con target applicativi separati rende agevole l'estensione del sistema con nuovi vincoli, nuove interfacce o miglioramenti all'algoritmo di ottimizzazione, senza dover riscrivere le parti già consolidate.
 
 \newpage

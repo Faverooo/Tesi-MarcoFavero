@@ -178,3 +178,8 @@
 
 % Break lines in code blocks whe using inputminted
 \setminted{breaklines}
+
+% Allow line breaks after underscores in inline typewriter text (\texttt),
+% so long identifiers (e.g. test_verify_model_params) wrap inside table cells
+% instead of overflowing into the adjacent column.
+\renewcommand{\_}{\textunderscore\allowbreak}

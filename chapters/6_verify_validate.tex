@@ -1,23 +1,358 @@
 \chapter{Verifica e validazione}
 \label{chap:verifica-validazione}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[alt={Testo alternativo dell'immagine}, width=1\columnwidth]{img/quantum_superposition.jpeg}
-    \caption{Lorem}
-    \label{fig:enter-label}
-\end{figure}
+\textit{In questo capitolo vengono descritte le attività di verifica e validazione condotte sul sistema sviluppato. La verifica ha l'obiettivo di accertare che il prodotto sia stato costruito correttamente, cioè che rispetti i requisiti definiti nell'analisi; la validazione verifica invece che il prodotto soddisfi le aspettative concrete del committente attraverso prove sul comportamento reale del sistema.}
 
-\lipsum[1-2]
+\section{Strategia di testing}
+\label{sec:strategia-testing}
 
-% Esempio di come importare un file contenente codice
-Lorem ipsum:
-\begin{listing}[H]
-\inputminted{python}{code/example.py}
-\caption{Fibonacci recursive}
-\label{listing:py_fibo}
-\end{listing}
+Data la natura del sistema --- un modulo di ottimizzazione combinatoria senza interfacce web classiche né framework di testing integrati --- la strategia di verifica è stata strutturata su due livelli distinti:
 
-\lipsum[1]
+\begin{itemize}
+    \item \textbf{Test di unità e di integrazione}: eseguibili C++ autonomi, compilati come target separati tramite CMake, che verificano il comportamento del solver CP-SAT su scenari sintetici costruiti senza connessione al database. Questi test non dipendono dall'ambiente di produzione e possono essere eseguiti in modo ripetibile anche in pipeline \gls{ci}.
+    \item \textbf{Validazione funzionale}: esecuzioni del sistema sull'intero stack (caricamento dati reali da MariaDB, risoluzione CP-SAT, esportazione risultati) condotte manualmente con il tutor aziendale, con l'obiettivo di verificare la correttezza del piano prodotto su dati di produzione reali.
+\end{itemize}
+
+Tutti i test di unità e integrazione risiedono nella cartella \texttt{tests/} del repository e vengono compilati come eseguibili autonomi. Ogni test stampa su standard output una riga \texttt{[PASS]} o \texttt{[FAIL]} per ogni caso verificato e termina con codice di uscita \texttt{0} in caso di successo, consentendone l'integrazione nella pipeline di Gitea CI.
+
+\section{Test di unità}
+\label{sec:test-unita}
+
+I test di unità verificano singole funzionalità del nucleo di pianificazione su casi sintetici costruiti appositamente, senza coinvolgere il database ERP né i target applicativi.
+
+\subsection{Test di non sovrapposizione base}
+
+Il test \texttt{test\_scheduler\_simple} rappresenta il caso minimo necessario a verificare che il solver CP-SAT si avvii correttamente e produca una soluzione ammissibile. Vengono creati due task di durata rispettivamente 60 e 30 minuti, assegnati alla medesima macchina, e si verifica che:
+
+\begin{itemize}
+    \item il solver restituisca uno stato \texttt{feasible};
+    \item gli intervalli schedulati non si sovrappongano, ovvero che per ogni coppia di task sulla stessa macchina non valga $\text{start}_a < \text{end}_b \wedge \text{start}_b < \text{end}_a$.
+\end{itemize}
+
+Questo test costituisce il \textit{smoke test} della build: se fallisce, indica un problema nella configurazione della libreria OR-Tools o nella compilazione del modulo di scheduling.
+
+\subsection{Test delle date di consegna}
+
+Il test \texttt{test\_verify\_due\_dates} verifica il comportamento del solver in presenza di vincoli di scadenza (\textit{due date}). Cinque scenari distinti coprono i casi principali:
+
+\begin{enumerate}
+    \item \textbf{Due date raggiungibile}: un task da 60 minuti con scadenza a 480 minuti dal piano deve terminare entro la scadenza (\texttt{end\_minutes <= 480}) con lateness nulla.
+    \item \textbf{Due date irraggiungibile}: un task da 120 minuti con scadenza a 60 minuti non può terminare in tempo. Il solver deve comunque produrre una soluzione ammissibile, con lateness positiva --- il modello penalizza il ritardo anziché dichiarare il problema infeasible.
+    \item \textbf{Due job con scadenze diverse}: il job con scadenza più ravvicinata deve essere schedulato prima.
+    \item \textbf{Task senza due date}: il solver deve essere comunque feasible quando la data di consegna è assente (campo opzionale).
+    \item \textbf{Due job sulla stessa macchina}: il job più urgente ottiene priorità di scheduling rispetto al meno urgente.
+\end{enumerate}
+
+\subsection{Test delle macchine e dei gruppi}
+
+Il test \texttt{test\_verify\_machines} verifica i due tipi di vincoli di capacità disponibili nel modello:
+
+\begin{itemize}
+    \item \textbf{NoOverlap su macchina esplicita}: tre task da 120 minuti ciascuno, assegnati alla stessa macchina tramite \texttt{machine\_source = "step"}, devono essere schedulati in sequenza. Il makespan atteso è almeno $3 \times 120 = 360$ minuti, e il numero di sovrapposizioni deve essere zero.
+    \item \textbf{Capacità cumulativa su gruppo}: quattro task da 120 minuti ciascuno, assegnati a un gruppo con capacità 2, devono poter essere eseguiti in parallelo a coppie. Il makespan atteso è almeno 240 minuti (due ondate) ma inferiore a 360 minuti (escludendo la serializzazione completa).
+\end{itemize}
+
+\subsection{Test delle precedenze}
+
+Il test \texttt{test\_verify\_precedences} verifica che il solver rispetti i vincoli di precedenza tra fasi dello stesso job (modellati tramite \texttt{phase\_number}): per ogni coppia di fasi consecutive appartenenti allo stesso ordine, deve valere $\text{start}_{\text{fase successiva}} \geq \text{end}_{\text{fase precedente}}$.
+
+\subsection{Test dell'orizzonte temporale}
+
+Il test \texttt{test\_verify\_horizon} verifica che tutti i task schedulati terminino entro l'orizzonte massimo configurato per la pianificazione, ovvero che $\text{end}_i \leq \text{horizon}$ per ogni task $i$ della soluzione.
+
+\subsection{Test dei parametri del modello}
+
+Il test \texttt{test\_verify\_model\_params} verifica che le impostazioni di configurazione del solver (timeout, strategia, limiti) vengano correttamente propagate al modello CP-SAT attraverso \texttt{SolverConfig}.
+
+\subsection{Test del chunking dei task}
+
+Il test \texttt{test\_verify\_chunking} verifica il meccanismo di \textit{task splitting} implementato in \texttt{TaskSplitter}: task di lunga durata vengono suddivisi in sotto-intervalli per adattarsi alle finestre del calendario lavorativo. I casi testati includono task che non richiedono suddivisione, task che vengono spezzati in più blocchi e la corretta conservazione della durata totale dopo il chunking.
+
+\subsection{Test degli ordini fissi}
+
+Il test \texttt{test\_verify\_fixed\_orders} verifica la gestione degli ordini già confermati (\textit{fixed orders}), cioè task con posizione temporale prefissata che il solver non deve spostare. Si verifica che i task fissi mantengano esattamente il loro slot originale e che i task liberi vengano schedulati senza sovrapporsi con essi.
+
+\subsection{Test dei costi di attrezzaggio}
+
+Il test \texttt{test\_changeover\_repro} verifica il comportamento del modello di costi di \gls{changeover} (tempi di attrezzaggio tra articoli diversi sulla stessa macchina) in condizioni critiche. Lo scenario principale replica un caso produzione reale: macchina con finestre lavorative da 140 minuti e setup massimo da 248 minuti. Quattro scenari coprono le combinazioni rilevanti:
+
+\begin{itemize}
+    \item \textbf{S0}: baseline senza changeover --- atteso feasible come riferimento.
+    \item \textbf{S1}: changeover attivo, macchina esplicita con setup superiore alla finestra (verifica che il solver gestisca correttamente slot multipli).
+    \item \textbf{S2}: changeover attivo, task con scelta della macchina tra alternative (una con matrice di changeover, una senza).
+    \item \textbf{S3}: task fuori dalla finestra di changeover --- il setup diventa fisso e non ottimizzabile.
+\end{itemize}
+
+\subsection{Test del calendario lavorativo}
+
+Il test \texttt{test\_calendar\_integration} verifica l'integrazione tra il solver e il calendario lavorativo delle macchine. I task devono essere schedulati esclusivamente all'interno delle finestre di disponibilità della macchina assegnata, e la durata effettiva deve essere estesa automaticamente per saltare i periodi non lavorativi (notti, weekend, festività).
+
+Il test complementare \texttt{test\_no\_calendar\_no\_overlap} verifica la correttezza del caso base senza calendario, assicurando che l'aggiunta del vincolo calendare non degradi il comportamento su input semplici.
+
+\subsection{Test delle macchine con calendario e assegnazione}
+
+Il test \texttt{test\_machine\_calendars\_and\_assignment} combina i vincoli calendare con l'assegnazione automatica della macchina all'interno di un gruppo. Si verifica che il solver scelga la macchina disponibile nel momento richiesto, rispettando sia il calendario individuale di ciascuna macchina sia la capacità del gruppo.
+
+\subsection{Test della pipeline a due fasi}
+
+Il test \texttt{test\_two\_phase\_pipeline} verifica l'approccio risolutivo a due fasi implementato in \texttt{TwoPhaseSolver}: nella prima fase il solver minimizza la lateness totale, nella seconda minimizza il makespan a parità di lateness. Si verifica che la soluzione finale rispetti entrambi i criteri e che la seconda fase non peggiori il risultato della prima.
+
+\subsection{Test delle priorità operative}
+
+Il test \texttt{test\_verify\_priority\_falmec} verifica la corretta applicazione dei pesi di priorità configurabili dall'operatore (UC7). Il test riproduce uno scenario ispirato ai dati di produzione dell'azienda: job con peso di priorità diverso devono essere favoriti nella minimizzazione della lateness rispetto a job con priorità inferiore.
+
+\subsection{Test delle utilità di data e ora}
+
+Il test \texttt{test\_unit\_utils} verifica le funzioni di conversione del modulo \texttt{utils::DateTime}: parsing di stringhe nel formato del database (\texttt{"YYYY-MM-DD HH:MM:SS"}), conversione in minuti relativi al piano, gestione del valore nullo (\texttt{std::nullopt}) per date assenti.
+
+\subsection{Test del salvataggio storico}
+
+Il test \texttt{test\_fixed\_orders\_save} verifica la persistenza delle esecuzioni nel database SQLite locale (\texttt{LocalRunStore}): dopo il completamento di una pianificazione, i KPI, i log e i task schedulati devono essere recuperabili tramite il \texttt{run\_uuid} assegnato all'esecuzione.
+
+\section{Riepilogo dei test}
+
+La tabella seguente riassume i test realizzati, il componente verificato e l'esito delle esecuzioni.
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{4.8cm}|p{5.5cm}|p{2.2cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Test}} &
+\multicolumn{1}{c|}{\textbf{Componente verificato}} &
+\multicolumn{1}{c|}{\textbf{Esito}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\multicolumn{1}{|c|}{\textbf{Test}} &
+\multicolumn{1}{c|}{\textbf{Componente verificato}} &
+\multicolumn{1}{c|}{\textbf{Esito}} \\
+\hline
+\endhead
+
+\texttt{test\_scheduler\_simple} & No-overlap base, avvio CP-SAT & Superato \\
+\hline
+\texttt{test\_verify\_due\_dates} & Rispetto e minimizzazione due date & Superato \\
+\hline
+\texttt{test\_verify\_machines} & NoOverlap e capacità cumulativa & Superato \\
+\hline
+\texttt{test\_verify\_precedences} & Precedenze tra fasi dello stesso job & Superato \\
+\hline
+\texttt{test\_verify\_horizon} & Rispetto dell'orizzonte temporale & Superato \\
+\hline
+\texttt{test\_verify\_model\_params} & Propagazione configurazione solver & Superato \\
+\hline
+\texttt{test\_verify\_chunking} & Suddivisione task su finestre calendario & Superato \\
+\hline
+\texttt{test\_verify\_fixed\_orders} & Ordini confermati a posizione fissa & Superato \\
+\hline
+\texttt{test\_changeover\_repro} & Costi di attrezzaggio tra articoli & Superato \\
+\hline
+\texttt{test\_calendar\_integration} & Integrazione calendario lavorativo & Superato \\
+\hline
+\texttt{test\_no\_calendar\_no\_overlap} & No-overlap senza calendario & Superato \\
+\hline
+\texttt{test\_machine\_calendars\_and\_assignment} & Calendario e assegnazione macchina & Superato \\
+\hline
+\texttt{test\_two\_phase\_pipeline} & Solver a due fasi (lateness + makespan) & Superato \\
+\hline
+\texttt{test\_verify\_priority\_falmec} & Pesi di priorità operativa & Superato \\
+\hline
+\texttt{test\_unit\_utils} & Conversioni DateTime & Superato \\
+\hline
+\texttt{test\_fixed\_orders\_save} & Persistenza storico su SQLite & Superato \\
+\hline
+
+\caption{Riepilogo dei test realizzati e del loro esito.}
+\label{tab:riepilogo_test}
+\end{longtable}
+\end{center}
+
+\section{Validazione funzionale}
+\label{sec:validazione-funzionale}
+
+La validazione funzionale è stata condotta attraverso sessioni di revisione con il tutor aziendale Matteo Forzan, con cadenza settimanale come previsto dal piano di lavoro. Nelle sessioni di validazione è stata utilizzata l'applicazione desktop Qt (\texttt{erpai\_ui}) come strumento principale, in quanto permette di avviare pianificazioni, visualizzare il piano risultante e analizzarne la qualità in modo interattivo.
+
+\subsection{Scenari di validazione}
+
+Per la validazione sono stati identificati i seguenti scenari, corrispondenti ai casi d'uso principali del sistema:
+
+\subsubsection{Scenario V1 -- Avvio pianificazione su dati reali}
+È stata avviata una pianificazione completa caricando i dati di produzione reali dal database ERP aziendale. Si è verificato che:
+\begin{itemize}
+    \item il sistema completasse il caricamento dei dati senza errori di connessione o parsing;
+    \item il solver CP-SAT producesse una soluzione ammissibile entro il timeout configurato;
+    \item i KPI visualizzati (makespan, lateness totale, numero di job in ritardo) fossero coerenti con i dati di input.
+\end{itemize}
+
+\subsubsection{Scenario V2 -- Visualizzazione e analisi del piano}
+Il piano prodotto è stato analizzato tramite le viste disponibili nell'interfaccia Qt. Si è verificato che:
+\begin{itemize}
+    \item il diagramma di Gantt mostrasse correttamente la distribuzione dei task sulle macchine senza sovrapposizioni visive;
+    \item la lista dei task pianificati riportasse per ciascun task la macchina assegnata, l'orario di inizio e di fine e l'eventuale ritardo rispetto alla data di consegna;
+    \item la sezione di analisi qualità evidenziasse i job in ritardo e i valori degli indicatori principali.
+\end{itemize}
+
+\subsubsection{Scenario V3 -- Modifica delle priorità operative}
+Sono state modificate le priorità operative tramite l'apposita schermata (UC7) e avviata una nuova pianificazione. Si è verificato che il piano risultante riflettesse le priorità aggiornate, con i job a priorità più elevata schedulati in anticipo rispetto agli altri.
+
+\subsubsection{Scenario V4 -- Esportazione del piano in JSON}
+Dopo il completamento di una pianificazione, si è verificato che la funzione di esportazione (UC5) producesse un file JSON ben formato e leggibile da strumenti esterni, con la struttura attesa (lista di task con attributi di macchina, orari e quantità).
+
+\subsubsection{Scenario V5 -- Avvio tramite API HTTP}
+È stata testata l'integrazione con il server HTTP (\texttt{erpai\_http}) inviando manualmente una richiesta \texttt{POST /api/planning/run} con i parametri di configurazione e verificando che:
+\begin{itemize}
+    \item il server rispondesse con codice HTTP 202 Accepted e restituisse un \texttt{run\_id};
+    \item la consultazione successiva dell'endpoint \texttt{GET /api/planning/status/\{run\_id\}} restituisse lo stato aggiornato del run.
+\end{itemize}
+
+\subsubsection{Scenario V6 -- Consultazione dello storico}
+Dopo l'esecuzione di più pianificazioni, si è verificato che la sezione storico (UC6) listasse correttamente le esecuzioni precedenti con data, durata ed esito, e che selezionando una voce fosse possibile accedere ai relativi KPI, log e task.
+
+\subsection{Esito della validazione}
+
+Tutti gli scenari di validazione sono stati completati con esito positivo. Il tutor aziendale ha confermato la correttezza delle pianificazioni prodotte rispetto alle aspettative operative: i piani risultanti rispettano i vincoli produttivi reali (precedenze tra fasi, disponibilità delle macchine, calendari lavorativi), minimizzano efficacemente i ritardi rispetto alle date di consegna e producono output leggibili e coerenti.
+
+\section{Tracciamento dei requisiti}
+\label{sec:tracciamento-requisiti}
+
+Le tabelle seguenti riportano lo stato di soddisfacimento di ciascun requisito al termine dello stage.
+
+\subsection{Requisiti funzionali}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{2.1cm}|p{7.5cm}|p{2.4cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Stato}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+RFN-1  & Configurazione parametri di pianificazione & Soddisfatto \\
+\hline
+RFN-2  & Inserimento data di inizio pianificazione & Soddisfatto \\
+\hline
+RFN-3  & Inserimento timeout del solver & Soddisfatto \\
+\hline
+RFN-4  & Selezione strategia di risoluzione & Soddisfatto \\
+\hline
+RFN-5  & Avvio pianificazione & Soddisfatto \\
+\hline
+RFN-6  & Monitoraggio esecuzione del solver & Soddisfatto \\
+\hline
+RFN-7  & Consultazione log di esecuzione & Soddisfatto \\
+\hline
+RFN-8  & Consultazione KPI in tempo reale & Soddisfatto \\
+\hline
+RFN-9  & Consultazione telemetria del solver & Soddisfatto \\
+\hline
+RFN-10 & Consultazione risultati della pianificazione & Soddisfatto \\
+\hline
+RFN-11 & Visualizzazione diagramma di Gantt & Soddisfatto \\
+\hline
+RFN-12 & Visualizzazione task pianificati & Soddisfatto \\
+\hline
+RFN-13 & Analisi qualità del piano & Soddisfatto \\
+\hline
+RFN-14 & Esportazione piano in formato JSON & Soddisfatto \\
+\hline
+RFN-15 & Consultazione elenco storico pianificazioni & Soddisfatto \\
+\hline
+RFN-16 & Consultazione dettaglio esecuzioni storiche & Soddisfatto \\
+\hline
+RFN-17 & Modifica priorità operative & Soddisfatto \\
+\hline
+RFN-18 & Stima ATP per nuovi ordini & Soddisfatto \\
+\hline
+RFN-19 & Selezione modalità di esecuzione (locale o gRPC) & Soddisfatto \\
+\hline
+RFN-20 & Avvio pianificazione da interfaccia Qt & Soddisfatto \\
+\hline
+RFN-21 & Avvio pianificazione tramite API HTTP & Soddisfatto \\
+\hline
+RFN-22 & Consultazione stato e KPI via API HTTP & Soddisfatto \\
+\hline
+
+\caption{Stato dei requisiti funzionali.}
+\label{tab:stato_requisiti_funzionali}
+\end{longtable}
+\end{center}
+
+\subsection{Requisiti qualitativi}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{2.1cm}|p{7.5cm}|p{2.4cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Stato}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+RQN-1 & Interfaccia intuitiva e utilizzabile dagli operatori & Soddisfatto \\
+\hline
+RQN-2 & Tempi di risposta adeguati nella visualizzazione dei risultati & Soddisfatto \\
+\hline
+RQN-3 & Aggiornamento continuo delle informazioni durante il calcolo & Soddisfatto \\
+\hline
+RQN-4 & Rispetto dei vincoli del modello di schedulazione & Soddisfatto \\
+\hline
+RQN-5 & Compatibilità dei dati esportati con strumenti esterni & Soddisfatto \\
+\hline
+RQN-6 & Tracciabilità delle esecuzioni nello storico locale & Soddisfatto \\
+\hline
+
+\caption{Stato dei requisiti qualitativi.}
+\label{tab:stato_requisiti_qualitativi}
+\end{longtable}
+\end{center}
+
+\subsection{Requisiti di vincolo}
+
+\begin{center}
+\rowcolors{1}{}{tableGray}
+\begin{longtable}{|p{2.1cm}|p{7.5cm}|p{2.4cm}|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Requisito}} &
+\multicolumn{1}{c|}{\textbf{Descrizione}} &
+\multicolumn{1}{c|}{\textbf{Stato}} \\
+\hline
+\endfirsthead
+\hline
+\multicolumn{3}{c}{{\bfseries Continuazione della tabella}}\\
+\hline
+\endhead
+
+RVN-1 & Sistema sviluppato in C++ & Soddisfatto \\
+\hline
+RVN-2 & Interfaccia grafica realizzata con Qt6 & Soddisfatto \\
+\hline
+RVN-3 & Solver di pianificazione con Google OR-Tools & Soddisfatto \\
+\hline
+RVN-4 & Esportazione dati in formato JSON & Soddisfatto \\
+\hline
+RVN-5 & Storico locale persistito tramite SQLite & Soddisfatto \\
+\hline
+RVN-6 & Interfaccia HTTP realizzata con Drogon & Soddisfatto \\
+\hline
+
+\caption{Stato dei requisiti di vincolo.}
+\label{tab:stato_requisiti_vincolo}
+\end{longtable}
+\end{center}
+
+Tutti i requisiti obbligatori identificati durante l'analisi risultano soddisfatti al termine dello stage.
 
 \newpage
