@@ -14,19 +14,9 @@ skinparam actor {
 
 actor "Operatore" as op
 
-rectangle "UC6 - Gestione storico pianificazioni" {
-    (UC6\nGestione storico\npianificazioni) as UC6
-    (UC6.1\nConsultazione elenco\nstorico pianificazioni) as UC61
-    (UC6.2\nConsultazione dettaglio\nesecuzione storica) as UC62
+rectangle "UC6 - Modifica priorita operative" {
+    (UC6\nModifica\npriorita operative) as UC6
 }
 
 op --> UC6
-UC6 ..> UC61 : <<include>>
-UC6 ..> UC62 : <<include>>
-
-note bottom of UC62
-  Precondizione: l'Operatore
-  deve trovarsi nell'elenco
-  storico (UC6.1)
-end note
 @enduml

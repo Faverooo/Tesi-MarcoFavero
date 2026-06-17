@@ -14,8 +14,8 @@ skinparam actor {
 
 actor "Operatore" as op
 
-rectangle "UC7 - Modifica priorita operative" {
-    (UC7\nModifica\npriorita operative) as UC7
+rectangle "UC7 - Stima ATP per nuovo ordine" {
+    (UC7\nStima ATP\nper nuovo ordine) as UC7
 }
 
 op --> UC7

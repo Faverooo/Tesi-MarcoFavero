@@ -14,11 +14,19 @@ skinparam actor {
 
 actor "Operatore" as op
 
-rectangle "UC5 - Esportazione piano in formato JSON" {
-    (UC5\nEsportazione piano\nin formato JSON) as UC5
-    (UC5.E1\nGestione errore\nscrittura su disco) as UC5E1
+rectangle "UC5 - Gestione storico pianificazioni" {
+    (UC5\nGestione storico\npianificazioni) as UC5
+    (UC5.1\nConsultazione elenco\nstorico pianificazioni) as UC51
+    (UC5.2\nConsultazione dettaglio\nesecuzione storica) as UC52
 }
 
 op --> UC5
-UC5E1 ..> UC5 : <<extend>>
+UC5 ..> UC51 : <<include>>
+UC5 ..> UC52 : <<include>>
+
+note bottom of UC52
+  Precondizione: l'Operatore
+  deve trovarsi nell'elenco
+  storico (UC5.1)
+end note
 @enduml

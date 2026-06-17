@@ -10,7 +10,7 @@ Data la natura del sistema --- un modulo di ottimizzazione combinatoria senza in
 
 \begin{itemize}
     \item \textbf{Test di unità e di integrazione}: eseguibili C++ autonomi, compilati come target separati tramite CMake, che verificano il comportamento del solver CP-SAT su scenari sintetici costruiti senza connessione al database. Questi test non dipendono dall'ambiente di produzione e possono essere eseguiti in modo ripetibile anche in pipeline \gls{ci}.
-    \item \textbf{Validazione funzionale}: esecuzioni del sistema sull'intero stack (caricamento dati reali da MariaDB, risoluzione CP-SAT, esportazione risultati) condotte manualmente con il tutor aziendale, con l'obiettivo di verificare la correttezza del piano prodotto su dati di produzione reali.
+    \item \textbf{Validazione funzionale}: esecuzioni del sistema sull'intero stack (caricamento dati reali da MariaDB, risoluzione CP-SAT) condotte manualmente con il tutor aziendale, con l'obiettivo di verificare la correttezza del piano prodotto su dati di produzione reali.
 \end{itemize}
 
 Tutti i test di unità e integrazione risiedono nella cartella \texttt{tests/} del repository e vengono compilati come eseguibili autonomi. Ogni test stampa su standard output una riga \texttt{[PASS]} o \texttt{[FAIL]} per ogni caso verificato e termina con codice di uscita \texttt{0} in caso di successo, consentendone l'integrazione nella pipeline di Gitea CI.
@@ -99,7 +99,7 @@ Il test \texttt{test\_two\_phase\_pipeline} verifica l'approccio risolutivo a du
 
 \subsection{Test delle priorità operative}
 
-Il test \texttt{test\_verify\_priority\_falmec} verifica la corretta applicazione dei pesi di priorità configurabili dall'operatore (UC7). Il test riproduce uno scenario ispirato ai dati di produzione dell'azienda: job con peso di priorità diverso devono essere favoriti nella minimizzazione della lateness rispetto a job con priorità inferiore.
+Il test \texttt{test\_verify\_priority\_falmec} verifica la corretta applicazione dei pesi di priorità configurabili dall'operatore (UC6). Il test riproduce uno scenario ispirato ai dati di produzione dell'azienda: job con peso di priorità diverso devono essere favoriti nella minimizzazione della lateness rispetto a job con priorità inferiore.
 
 \subsection{Test delle utilità di data e ora}
 
@@ -195,20 +195,17 @@ Il piano prodotto è stato analizzato tramite le viste disponibili nell'interfac
 \end{itemize}
 
 \subsubsection{Scenario V3 -- Modifica delle priorità operative}
-Sono state modificate le priorità operative tramite l'apposita schermata (UC7) e avviata una nuova pianificazione. Si è verificato che il piano risultante riflettesse le priorità aggiornate, con i job a priorità più elevata schedulati in anticipo rispetto agli altri.
+Sono state modificate le priorità operative tramite l'apposita schermata (UC6) e avviata una nuova pianificazione. Si è verificato che il piano risultante riflettesse le priorità aggiornate, con i job a priorità più elevata schedulati in anticipo rispetto agli altri.
 
-\subsubsection{Scenario V4 -- Esportazione del piano in JSON}
-Dopo il completamento di una pianificazione, si è verificato che la funzione di esportazione (UC5) producesse un file JSON ben formato e leggibile da strumenti esterni, con la struttura attesa (lista di task con attributi di macchina, orari e quantità).
-
-\subsubsection{Scenario V5 -- Avvio tramite API HTTP}
+\subsubsection{Scenario V4 -- Avvio tramite API HTTP}
 È stata testata l'integrazione con il server HTTP (\texttt{erpai\_http}) inviando manualmente una richiesta \texttt{POST /api/planning/run} con i parametri di configurazione e verificando che:
 \begin{itemize}
     \item il server rispondesse con codice HTTP 202 Accepted e restituisse un \texttt{run\_id};
     \item la consultazione successiva dell'endpoint \texttt{GET /api/planning/status/\{run\_id\}} restituisse lo stato aggiornato del run.
 \end{itemize}
 
-\subsubsection{Scenario V6 -- Consultazione dello storico}
-Dopo l'esecuzione di più pianificazioni, si è verificato che la sezione storico (UC6) listasse correttamente le esecuzioni precedenti con data, durata ed esito, e che selezionando una voce fosse possibile accedere ai relativi KPI, log e task.
+\subsubsection{Scenario V5 -- Consultazione dello storico}
+Dopo l'esecuzione di più pianificazioni, si è verificato che la sezione storico (UC5) listasse correttamente le esecuzioni precedenti con data, durata ed esito, e che selezionando una voce fosse possibile accedere ai relativi KPI, log e task.
 
 \subsection{Esito della validazione}
 
@@ -261,23 +258,21 @@ RFN-12 & Visualizzazione task pianificati & Soddisfatto \\
 \hline
 RFN-13 & Analisi qualità del piano & Soddisfatto \\
 \hline
-RFN-14 & Esportazione piano in formato JSON & Soddisfatto \\
+RFN-14 & Consultazione elenco storico pianificazioni & Soddisfatto \\
 \hline
-RFN-15 & Consultazione elenco storico pianificazioni & Soddisfatto \\
+RFN-15 & Consultazione dettaglio esecuzioni storiche & Soddisfatto \\
 \hline
-RFN-16 & Consultazione dettaglio esecuzioni storiche & Soddisfatto \\
+RFN-16 & Modifica priorità operative & Soddisfatto \\
 \hline
-RFN-17 & Modifica priorità operative & Soddisfatto \\
+RFN-17 & Stima ATP per nuovi ordini & Soddisfatto \\
 \hline
-RFN-18 & Stima ATP per nuovi ordini & Soddisfatto \\
+RFN-18 & Selezione modalità di esecuzione (locale o gRPC) & Soddisfatto \\
 \hline
-RFN-19 & Selezione modalità di esecuzione (locale o gRPC) & Soddisfatto \\
+RFN-19 & Avvio pianificazione da interfaccia Qt & Soddisfatto \\
 \hline
-RFN-20 & Avvio pianificazione da interfaccia Qt & Soddisfatto \\
+RFN-20 & Avvio pianificazione tramite API HTTP & Soddisfatto \\
 \hline
-RFN-21 & Avvio pianificazione tramite API HTTP & Soddisfatto \\
-\hline
-RFN-22 & Consultazione stato e KPI via API HTTP & Soddisfatto \\
+RFN-21 & Consultazione stato e KPI via API HTTP & Soddisfatto \\
 \hline
 
 \caption{Stato dei requisiti funzionali.}
@@ -309,9 +304,7 @@ RQN-3 & Aggiornamento continuo delle informazioni durante il calcolo & Soddisfat
 \hline
 RQN-4 & Rispetto dei vincoli del modello di schedulazione & Soddisfatto \\
 \hline
-RQN-5 & Compatibilità dei dati esportati con strumenti esterni & Soddisfatto \\
-\hline
-RQN-6 & Tracciabilità delle esecuzioni nello storico locale & Soddisfatto \\
+RQN-5 & Tracciabilità delle esecuzioni nello storico locale & Soddisfatto \\
 \hline
 
 \caption{Stato dei requisiti qualitativi.}
@@ -341,11 +334,9 @@ RVN-2 & Interfaccia grafica realizzata con Qt6 & Soddisfatto \\
 \hline
 RVN-3 & Solver di pianificazione con Google OR-Tools & Soddisfatto \\
 \hline
-RVN-4 & Esportazione dati in formato JSON & Soddisfatto \\
+RVN-4 & Storico locale persistito tramite SQLite & Soddisfatto \\
 \hline
-RVN-5 & Storico locale persistito tramite SQLite & Soddisfatto \\
-\hline
-RVN-6 & Interfaccia HTTP realizzata con Drogon & Soddisfatto \\
+RVN-5 & Interfaccia HTTP realizzata con Drogon & Soddisfatto \\
 \hline
 
 \caption{Stato dei requisiti di vincolo.}

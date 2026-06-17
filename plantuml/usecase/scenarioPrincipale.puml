@@ -20,11 +20,10 @@ rectangle "Sistema di pianificazione produzione" {
     (UC2\nAvvio\npianificazione) as UC2
     (UC3\nMonitoraggio\nesecuzione) as UC3
     (UC4\nConsultazione\nrisultati) as UC4
-    (UC5\nEsportazione\npiano JSON) as UC5
-    (UC6\nGestione\nstorico) as UC6
-    (UC7\nModifica\npriorita operative) as UC7
-    (UC8\nStima ATP\nnuovo ordine) as UC8
-    (UC9\nConsultazione stato\nrun via API) as UC9
+    (UC5\nGestione\nstorico) as UC5
+    (UC6\nModifica\npriorita operative) as UC6
+    (UC7\nStima ATP\nnuovo ordine) as UC7
+    (UC8\nConsultazione stato\nrun via API) as UC8
 }
 
 op --> UC1
@@ -34,8 +33,7 @@ op --> UC4
 op --> UC5
 op --> UC6
 op --> UC7
-op --> UC8
 
 erp --> UC2
-erp --> UC9
+erp --> UC8
 @enduml

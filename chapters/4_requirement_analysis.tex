@@ -97,19 +97,17 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item UC4.3 -- Analisi qualità del piano
     \end{itemize}
 
-    \item \textbf{UC5 -- Esportazione piano in formato \gls{json}}
-
-    \item \textbf{UC6 -- Gestione storico pianificazioni}
+    \item \textbf{UC5 -- Gestione storico pianificazioni}
     \begin{itemize}
-        \item UC6.1 -- Consultazione elenco storico pianificazioni
-        \item UC6.2 -- Consultazione dettaglio esecuzione storica
+        \item UC5.1 -- Consultazione elenco storico pianificazioni
+        \item UC5.2 -- Consultazione dettaglio esecuzione storica
     \end{itemize}
 
-    \item \textbf{UC7 -- Modifica priorità operative}
+    \item \textbf{UC6 -- Modifica priorità operative}
 
-    \item \textbf{UC8 -- Stima ATP per nuovo ordine}
+    \item \textbf{UC7 -- Stima ATP per nuovo ordine}
 
-    \item \textbf{UC9 -- Consultazione stato pianificazione via API}
+    \item \textbf{UC8 -- Consultazione stato pianificazione via API}
 \end{itemize}
 
 \subsection{Dettaglio dei casi d'uso}
@@ -301,7 +299,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
         \item Il Sistema ERP invia una richiesta HTTP POST all'endpoint \texttt{/api/planning/run} con i parametri della pianificazione: data di inizio, timeout, modalità di esecuzione del solver (\texttt{use\_remote\_solver}) e altri parametri avanzati facoltativi.
         \item Il server accetta la richiesta in modo asincrono e risponde immediatamente con HTTP 202 Accepted, restituendo un identificativo univoco del run (\texttt{run\_id}).
         \item Il sistema esegue il flusso descritto in UC2 in background.
-        \item Il Sistema ERP utilizza il \texttt{run\_id} ricevuto per monitorare lo stato del run $\rightarrow$ UC9.
+        \item Il Sistema ERP utilizza il \texttt{run\_id} ricevuto per monitorare lo stato del run $\rightarrow$ UC8.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
@@ -518,47 +516,15 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Trigger:} l'Operatore vuole valutare se il piano prodotto sia soddisfacente rispetto ai vincoli e agli obiettivi.
 \end{itemize}
 
-\subsubsection{Esportazione piano in formato JSON}
-
-\paragraph{UC5 -- Esportazione piano in formato JSON}
-\begin{itemize}
-    \item \textbf{Attore principale:} Operatore.
-    \item \textbf{Scenario principale:}
-    \begin{enumerate}
-        \item L'Operatore accede alla funzione di esportazione.
-        \item L'Operatore seleziona il percorso di destinazione del file.
-        \item Il sistema serializza il piano in formato JSON.
-        \item Il file viene salvato su disco e il sistema notifica il completamento.
-    \end{enumerate}
-    \item \textbf{Precondizioni:}
-    \begin{itemize}
-        \item l'applicazione è disponibile e raggiungibile.
-        \item il piano di produzione è disponibile $\rightarrow$ UC2.
-    \end{itemize}
-    \item \textbf{Postcondizioni:}
-    \begin{itemize}
-        \item il file JSON risulta disponibile all'Operatore nel percorso selezionato.
-    \end{itemize}
-    \item \textbf{Scenario alternativo:} la scrittura su disco fallisce per permessi insufficienti o spazio esaurito; il sistema notifica l'errore all'Operatore e il file non viene creato.
-    \item \textbf{Trigger:} l'Operatore vuole ottenere una rappresentazione interoperabile del piano.
-\end{itemize}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.65\columnwidth]{img/usecase/uc5.png}
-    \caption{UC5 -- Esportazione piano in formato JSON}
-    \label{fig:uc5}
-\end{figure}
-
 \subsubsection{Gestione storico pianificazioni}
 
-\paragraph{UC6 -- Gestione storico pianificazioni}
+\paragraph{UC5 -- Gestione storico pianificazioni}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
-        \item L'Operatore apre la sezione storico e consulta l'elenco delle pianificazioni precedenti $\rightarrow$ UC6.1.
-        \item L'Operatore seleziona una pianificazione dall'elenco e ne consulta il dettaglio $\rightarrow$ UC6.2.
+        \item L'Operatore apre la sezione storico e consulta l'elenco delle pianificazioni precedenti $\rightarrow$ UC5.1.
+        \item L'Operatore seleziona una pianificazione dall'elenco e ne consulta il dettaglio $\rightarrow$ UC5.2.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
@@ -571,20 +537,20 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \end{itemize}
     \item \textbf{Inclusioni:}
     \begin{itemize}
-        \item UC6.1 -- Consultazione elenco storico pianificazioni.
-        \item UC6.2 -- Consultazione dettaglio esecuzione storica.
+        \item UC5.1 -- Consultazione elenco storico pianificazioni.
+        \item UC5.2 -- Consultazione dettaglio esecuzione storica.
     \end{itemize}
     \item \textbf{Trigger:} l'Operatore vuole confrontare esecuzioni passate o recuperare informazioni pregresse.
 \end{itemize}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\columnwidth]{img/usecase/uc6.png}
-    \caption{UC6 -- Gestione storico pianificazioni}
-    \label{fig:uc6}
+    \includegraphics[width=0.75\columnwidth]{img/usecase/uc5.png}
+    \caption{UC5 -- Gestione storico pianificazioni}
+    \label{fig:uc5}
 \end{figure}
 
-\paragraph{UC6.1 -- Consultazione elenco storico pianificazioni}
+\paragraph{UC5.1 -- Consultazione elenco storico pianificazioni}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
     \item \textbf{Scenario principale:}
@@ -596,7 +562,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \begin{itemize}
         \item l'applicazione è disponibile e raggiungibile.
         \item lo storico locale contiene almeno una pianificazione memorizzata.
-        \item l'Operatore si trova nella sezione storico $\rightarrow$ UC6.
+        \item l'Operatore si trova nella sezione storico $\rightarrow$ UC5.
     \end{itemize}
     \item \textbf{Postcondizioni:}
     \begin{itemize}
@@ -605,19 +571,19 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Trigger:} l'Operatore vuole accedere allo storico delle pianificazioni eseguite.
 \end{itemize}
 
-\paragraph{UC6.2 -- Consultazione dettaglio esecuzione storica}
+\paragraph{UC5.2 -- Consultazione dettaglio esecuzione storica}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
-        \item L'Operatore seleziona una pianificazione dall'elenco storico $\rightarrow$ UC6.1.
+        \item L'Operatore seleziona una pianificazione dall'elenco storico $\rightarrow$ UC5.1.
         \item L'Operatore visualizza il dettaglio dell'esecuzione: esito, KPI, log e task pianificati.
     \end{enumerate}
     \item \textbf{Precondizioni:}
     \begin{itemize}
         \item l'applicazione è disponibile e raggiungibile.
         \item esiste almeno una pianificazione storica selezionabile.
-        \item l'Operatore sta consultando l'elenco storico $\rightarrow$ UC6.1.
+        \item l'Operatore sta consultando l'elenco storico $\rightarrow$ UC5.1.
     \end{itemize}
     \item \textbf{Postcondizioni:}
     \begin{itemize}
@@ -628,7 +594,7 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
 
 \subsubsection{Modifica priorità operative}
 
-\paragraph{UC7 -- Modifica priorità operative}
+\paragraph{UC6 -- Modifica priorità operative}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
     \item \textbf{Scenario principale:}
@@ -651,14 +617,14 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\columnwidth]{img/usecase/uc7.png}
-    \caption{UC7 -- Modifica priorità operative}
-    \label{fig:uc7}
+    \includegraphics[width=0.75\columnwidth]{img/usecase/uc6.png}
+    \caption{UC6 -- Modifica priorità operative}
+    \label{fig:uc6}
 \end{figure}
 
 \subsubsection{Stima ATP per nuovo ordine}
 
-\paragraph{UC8 -- Stima ATP per nuovo ordine}
+\paragraph{UC7 -- Stima ATP per nuovo ordine}
 \begin{itemize}
     \item \textbf{Attore principale:} Operatore.
     \item \textbf{Scenario principale:}
@@ -681,14 +647,14 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\columnwidth]{img/usecase/uc8.png}
-    \caption{UC8 -- Stima ATP per nuovo ordine}
-    \label{fig:uc8}
+    \includegraphics[width=0.75\columnwidth]{img/usecase/uc7.png}
+    \caption{UC7 -- Stima ATP per nuovo ordine}
+    \label{fig:uc7}
 \end{figure}
 
 \subsubsection{Consultazione stato pianificazione via API}
 
-\paragraph{UC9 -- Consultazione stato pianificazione via API}
+\paragraph{UC8 -- Consultazione stato pianificazione via API}
 \begin{itemize}
     \item \textbf{Attore principale:} Sistema ERP.
     \item \textbf{Scenario principale:}
@@ -712,9 +678,9 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\columnwidth]{img/usecase/uc9.png}
-    \caption{UC9 -- Consultazione stato pianificazione via API}
-    \label{fig:uc9}
+    \includegraphics[width=0.65\columnwidth]{img/usecase/uc8.png}
+    \caption{UC8 -- Consultazione stato pianificazione via API}
+    \label{fig:uc8}
 \end{figure}
 
 \newpage
@@ -785,23 +751,21 @@ RFN-12 & Visualizzazione dei task pianificati & UC4.2 & N \\
 \hline
 RFN-13 & Analisi della qualità del piano & UC4.3 & N \\
 \hline
-RFN-14 & Esportazione del piano in formato JSON & UC5 & N \\
+RFN-14 & Consultazione dell'elenco storico pianificazioni & UC5.1 & N \\
 \hline
-RFN-15 & Consultazione dell'elenco storico pianificazioni & UC6.1 & N \\
+RFN-15 & Consultazione del dettaglio di esecuzioni storiche & UC5.2 & N \\
 \hline
-RFN-16 & Consultazione del dettaglio di esecuzioni storiche & UC6.2 & N \\
+RFN-16 & Modifica delle priorità operative & UC6 & N \\
 \hline
-RFN-17 & Modifica delle priorità operative & UC7 & N \\
+RFN-17 & Stima ATP per nuovi ordini & UC7 & N \\
 \hline
-RFN-18 & Stima ATP per nuovi ordini & UC8 & N \\
+RFN-18 & Selezione della modalità di esecuzione del solver (locale o remota via gRPC) & UC1.4 & N \\
 \hline
-RFN-19 & Selezione della modalità di esecuzione del solver (locale o remota via gRPC) & UC1.4 & N \\
+RFN-19 & Avvio della pianificazione da interfaccia Qt & UC2.A & N \\
 \hline
-RFN-20 & Avvio della pianificazione da interfaccia Qt & UC2.A & N \\
+RFN-20 & Avvio della pianificazione tramite API HTTP da parte del Sistema ERP & UC2.B & N \\
 \hline
-RFN-21 & Avvio della pianificazione tramite API HTTP da parte del Sistema ERP & UC2.B & N \\
-\hline
-RFN-22 & Consultazione dello stato e dei KPI di un run via API HTTP & UC9 & N \\
+RFN-21 & Consultazione dello stato e dei KPI di un run via API HTTP & UC8 & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti funzionali.}
@@ -826,7 +790,7 @@ RFN-22 & Consultazione dello stato e dei KPI di un run via API HTTP & UC9 & N \\
 \hline
 \endhead
 
-RQN-1 & L'interfaccia deve risultare intuitiva e utilizzabile dagli operatori & UC1--UC8 & N \\
+RQN-1 & L'interfaccia deve risultare intuitiva e utilizzabile dagli operatori & UC1--UC7 & N \\
 \hline
 RQN-2 & Il sistema deve garantire tempi di risposta adeguati nella visualizzazione dei risultati & UC4 & N \\
 \hline
@@ -834,9 +798,7 @@ RQN-3 & Le informazioni di esecuzione devono essere aggiornate in modo continuo 
 \hline
 RQN-4 & La pianificazione deve rispettare i vincoli del modello di schedulazione & UC2 & N \\
 \hline
-RQN-5 & I dati esportati devono essere compatibili con strumenti esterni & UC5 & N \\
-\hline
-RQN-6 & Le esecuzioni devono essere tracciabili nello storico locale & UC6.1, UC6.2 & N \\
+RQN-5 & Le esecuzioni devono essere tracciabili nello storico locale & UC5.1, UC5.2 & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti qualitativi.}
@@ -867,11 +829,9 @@ RVN-2 & L'interfaccia grafica di debug e testing deve essere realizzata con Qt6 
 \hline
 RVN-3 & Il solver di pianificazione deve utilizzare Google OR-Tools & UC2 & N \\
 \hline
-RVN-4 & L'esportazione dei dati deve avvenire in formato JSON & UC5 & N \\
+RVN-4 & Lo storico locale deve essere persistito tramite SQLite & UC5.1, UC5.2 & N \\
 \hline
-RVN-5 & Lo storico locale deve essere persistito tramite SQLite & UC6.1, UC6.2 & N \\
-\hline
-RVN-6 & L'interfaccia HTTP di produzione deve essere realizzata con il framework Drogon & UC2.B & N \\
+RVN-5 & L'interfaccia HTTP di produzione deve essere realizzata con il framework Drogon & UC2.B & N \\
 \hline
 
 \caption{Tabella del tracciamento dei requisiti di vincolo.}

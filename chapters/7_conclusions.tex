@@ -8,7 +8,9 @@ Lo stage si è svolto presso Spazio Dev S.r.l. per una durata complessiva di 300
 
 La prima settimana è stata dedicata all'analisi del contesto produttivo aziendale e alla configurazione dell'ambiente di sviluppo, con particolare attenzione alla comprensione del funzionamento del gestionale ERP e dei reparti pilota. Le settimane successive hanno seguito progressivamente la costruzione del sistema: modellazione dei dati, implementazione della logica di schedulazione CP-SAT, sviluppo dell'interfaccia Qt, integrazione dell'API HTTP e implementazione della stima ATP. Le ultime due settimane sono state dedicate alla rifinitura del codice, all'attività di testing, alla validazione con il tutor aziendale e alla redazione della presente relazione.
 
-In generale, le attività previste sono state completate nei tempi concordati. L'unica attività che ha richiesto un impegno superiore alle stime iniziali è stata l'implementazione del modello CP-SAT: la complessità dei vincoli di precedenza tra fasi, la gestione del calendario lavorativo e l'integrazione dei costi di attrezzaggio hanno richiesto iterazioni di progettazione e testing più estese del previsto. Questo ha comportato una riduzione del tempo disponibile per alcune funzionalità facoltative, come descritto nella sezione successiva.
+In generale, le attività previste sono state completate nei tempi concordati. L'unica attività che ha richiesto un impegno superiore alle stime iniziali è stata l'implementazione del modello CP-SAT: la complessità dei vincoli di precedenza tra fasi, la gestione del calendario lavorativo e l'integrazione dei costi di attrezzaggio hanno richiesto iterazioni di progettazione e testing più estese del previsto. Questo ha comportato una riduzione del tempo disponibile per alcune funzionalità facoltative, come descritto nella sezione successiva. 
+
+Viceversa la stima ATP è stata più rapida del previsto, in quanto la previsione delle task da schedulare viene fornita dal progetto principale in PHP, dunque il solver deve solo calcolare la data di completamento degli ordini in base al piano di produzione generato. 
 
 \section{Raggiungimento degli obiettivi}
 \label{sec:raggiungimento-obiettivi}
@@ -73,7 +75,7 @@ D03 & Predisporre dati di esempio e scenari di test riutilizzabili per future es
 \end{longtable}
 \end{center}
 
-Anche tutti gli obiettivi desiderabili sono stati raggiunti. La vista di monitoraggio espone in tempo reale i KPI di carico (makespan, lateness totale, numero di job in ritardo), l'esportazione JSON del piano è disponibile dall'interfaccia Qt, e la suite di test nella cartella \texttt{tests/} costituisce una raccolta di scenari riutilizzabili per future estensioni.
+Anche tutti gli obiettivi desiderabili sono stati raggiunti. La vista di monitoraggio espone in tempo reale i KPI di carico (makespan, lateness totale, numero di job in ritardo) e la suite di test nella cartella \texttt{tests/} costituisce una raccolta di scenari riutilizzabili per future estensioni.
 
 \subsection{Obiettivi facoltativi}
 
@@ -121,7 +123,7 @@ Sul piano metodologico, lo stage ha consolidato l'abitudine a lavorare seguendo 
 \section{Valutazione personale}
 \label{sec:valutazione}
 
-L'esperienza di stage si è rivelata complessivamente molto positiva e formativa. Lavorare su un problema reale --- la pianificazione della produzione di un'azienda manifatturiera --- ha dato concretezza alle competenze acquisite durante il percorso universitario, in particolare quelle legate all'ingegneria del software e agli algoritmi. La consapevolezza che il piano prodotto dal solver avrebbe potuto essere effettivamente utilizzato per organizzare il lavoro di operatori in un reparto produttivo ha reso il lavoro più motivante rispetto a un progetto puramente accademico.
+L'esperienza di stage si è rivelata complessivamente molto positiva e formativa. Lavorare su un problema reale --- la pianificazione della produzione di un'azienda manifatturiera --- ha dato concretezza alle competenze acquisite durante il percorso universitario, in particolare quelle legate all'ingegneria del software, ricerca operativa e agli algoritmi. La consapevolezza che il piano prodotto dal solver avrebbe potuto essere effettivamente utilizzato per organizzare il lavoro di operatori in un reparto produttivo ha reso il lavoro più motivante rispetto a un progetto puramente accademico.
 
 Il contesto aziendale di Spazio Dev S.r.l. si è rivelato stimolante: le dimensioni contenute dell'organizzazione hanno permesso di avere visibilità sull'intero stack tecnologico del prodotto --- dal database SQL alle interfacce ERP --- e di interagire direttamente con il tutor aziendale con una frequenza che ha accelerato notevolmente la comprensione del dominio.
 

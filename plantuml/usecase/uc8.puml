@@ -12,11 +12,11 @@ skinparam actor {
     BorderColor #555555
 }
 
-actor "Operatore" as op
+actor "Sistema ERP" as erp
 
-rectangle "UC8 - Stima ATP per nuovo ordine" {
-    (UC8\nStima ATP\nper nuovo ordine) as UC8
+rectangle "UC8 - Consultazione stato run via API" {
+    (UC8\nConsultazione stato\npianificazione via API) as UC8
 }
 
-op --> UC8
+erp --> UC8
 @enduml

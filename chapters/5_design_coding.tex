@@ -17,7 +17,7 @@ C++20 è lo standard ISO del linguaggio C++ adottato nel progetto (requisito RVN
 
 \subsubsection{Qt6}
 
-Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, mantenuto da Qt Group. Qt6 è la versione adottata per il target \texttt{erpai\_ui}, l'applicazione desktop sviluppata principalmente come strumento di debug e testing durante le sessioni di sviluppo. Grazie alla sua interfaccia grafica interattiva, permette di configurare e avviare pianificazioni, visualizzare in tempo reale il diagramma di Gantt, i KPI e i log del solver, e riprodurre scenari di test senza ricorrere alla pipeline HTTP di produzione. Tra le caratteristiche fondamentali di Qt6 per il progetto:
+Qt è un framework multipiattaforma per lo sviluppo di applicazioni desktop, mantenuto da Qt Group. Qt6 è la versione adottata per il target \texttt{erpai\_ui}, l'applicazione desktop sviluppata principalmente come strumento di debug e testing durante le sessioni di sviluppo. Grazie alla sua interfaccia grafica interattiva, permette di configurare e avviare pianificazioni, visualizzare il diagramma di Gantt, i KPI e i log del solver, e riprodurre scenari di test senza ricorrere alla pipeline HTTP di produzione. Tra le caratteristiche fondamentali di Qt6 per il progetto:
 
 \begin{itemize}
     \item \textbf{Signals \& Slots}: meccanismo di comunicazione tra oggetti che consente di connettere eventi (\textit{signals}) emessi da un oggetto a metodi (\textit{slots}) di un altro, anche tra thread diversi, grazie alle \textit{queued connections} che garantiscono la thread-safety degli aggiornamenti alla UI.
@@ -116,7 +116,7 @@ Il \texttt{TwoPhaseSolver} implementa una pipeline di risoluzione a due fasi per
     \item \textbf{Fase 2 (Full)}: ottimizza sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce calendari giornalieri per macchina, vincoli di capacità cumulativa e funzione obiettivo multi-criterio (lateness totale dei job + makespan come criterio secondario).
 \end{itemize}
 
-Qualora la fase 2 non produca una soluzione migliore entro il timeout configurato, il sistema adotta come risultato finale la soluzione della fase 1 (\textit{fallback}).
+Qualora la fase 2 non produca una soluzione migliore entro il timeout configurato, il sistema blocca il salvataggio a database. (\textit{fallback}).
 
 \section{Design Pattern adottati}
 \label{sec:design-pattern}
@@ -279,6 +279,6 @@ La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il 
 \subsection{GanttWidget}
 \label{subsec:ganttwidget}
 
-\texttt{GanttWidget} è un widget Qt personalizzato che visualizza il diagramma di Gantt del piano generato. Il rendering è realizzato con \texttt{QPainter}: sull'asse orizzontale è rappresentata la linea temporale del piano; sull'asse verticale sono elencate le macchine. Ogni task schedulato è disegnato come un blocco colorato sulla riga della macchina assegnata, con tooltip che mostrano il dettaglio dell'ordine. Il widget si aggiorna in tempo reale durante l'esecuzione del solver, ricevendo i blocchi Gantt tramite il segnale \texttt{machineTimeline} di \texttt{PlannerWorker}.
+\texttt{GanttWidget} è un widget Qt personalizzato che visualizza il diagramma di Gantt del piano generato. Il rendering è realizzato con \texttt{QPainter}: sull'asse orizzontale è rappresentata la linea temporale del piano; sull'asse verticale sono elencate le macchine. Ogni task schedulato è disegnato come un blocco colorato sulla riga della macchina assegnata, con tooltip che mostrano il dettaglio dell'ordine. 
 
 \newpage
