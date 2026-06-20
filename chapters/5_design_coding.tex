@@ -48,11 +48,11 @@ Il solver opera su dominio intero, coerente con la rappresentazione dei tempi in
 
 \subsubsection{MariaDB Connector/C++}
 
-MariaDB Connector/C++ è il driver ufficiale per la connessione a database MariaDB/MySQL da applicazioni C++. Viene impiegato per caricare dal database ERP i dati di input alla pianificazione: ordini di produzione (\texttt{mrp\_steps\_plans}), fasi di lavorazione (\texttt{steps}), macchine, gruppi macchina e relative associazioni. Le strutture dati caricate (es. \texttt{MrpStepsPlans}, \texttt{Steps}, \texttt{Machines}) sono modellate come classi C++ corrispondenti alle tabelle del gestionale aziendale, gestite nel namespace \texttt{db}.
+MariaDB Connector/C++ è il driver ufficiale per la connessione a database MariaDB/MySQL da applicazioni C++. Viene impiegato per caricare dal database ERP i dati di input alla pianificazione: ordini di produzione (\texttt{mrp\_tasks}), fasi di lavorazione (\texttt{steps}), macchine, gruppi macchina e relative associazioni. Le strutture dati caricate (es. \texttt{MrpStepsPlans}, \texttt{Steps}, \texttt{Machines}) sono modellate come classi C++ corrispondenti alle tabelle del gestionale aziendale, gestite nel namespace \texttt{db}.
 
 \subsubsection{gRPC e Protocol Buffers}
 
-gRPC è un framework open source per chiamate a procedure remote ad alte prestazioni, sviluppato da Google. Utilizza Protocol Buffers come formato di serializzazione binaria dei messaggi.
+gRPC è un framework open source per chiamate a procedure remote, sviluppato da Google. Utilizza Protocol Buffers come formato di serializzazione binaria dei messaggi.
 
 Nel progetto, gRPC non è un'interfaccia generica: è l'opzione di deployment che consente di delegare \textbf{esclusivamente la fase di calcolo CP-SAT} a un server dedicato. Il target \texttt{erpai\_grpc\_solver} espone il servizio \texttt{PlanningService} con il metodo \texttt{RunPlanning}, che riceve il modello di scheduling già costruito dal chiamante e ne esegue la risoluzione, restituendo in streaming gli aggiornamenti di stato (KPI, log, soluzione incumbent).
 
@@ -60,7 +60,7 @@ In questo scenario, il modulo chiamante --- che sia il server HTTP, il daemon o 
 
 \subsubsection{Drogon}
 
-Drogon è un framework C++ per la realizzazione di server HTTP e WebSocket ad alte prestazioni. Nel progetto viene impiegato per il target \texttt{erpai\_http}, l'interfaccia REST di produzione attraverso cui l'applicazione ERP in PHP comunica con il solver. Le route esposte permettono di avviare una pianificazione, leggere il piano risultante e consultare lo storico delle esecuzioni. Grazie alla sua architettura asincrona e non bloccante basata su coroutine, Drogon gestisce richieste concorrenti senza penalizzare il tempo di risposta.
+Drogon è un framework C++ per la realizzazione di server HTTP e WebSocket. Nel progetto viene impiegato per il target \texttt{erpai\_http}, l'interfaccia REST di produzione attraverso cui l'applicazione ERP in PHP comunica con il solver. Le route esposte permettono di avviare una pianificazione, leggere il piano risultante e consultare lo storico delle esecuzioni. Grazie alla sua architettura asincrona e non bloccante basata su coroutine, Drogon gestisce richieste concorrenti senza penalizzare il tempo di risposta.
 
 \subsection{Containerizzazione}
 \label{subsec:docker}
@@ -97,7 +97,7 @@ Questa separazione garantisce che la logica di pianificazione possa essere testa
 Il flusso di esecuzione di una pianificazione segue le fasi descritte di seguito.
 
 \begin{enumerate}
-    \item \textbf{Caricamento dati} (\texttt{MrpDataLoader}): carica da MariaDB gli ordini di produzione, le fasi di lavorazione, le macchine, i calendari lavorativi per macchina e le impostazioni \gls{mrp}.
+    \item \textbf{Caricamento dati} (\texttt{Coordinator}): carica da MariaDB gli ordini di produzione, le fasi di lavorazione, le macchine, i calendari lavorativi per macchina e le impostazioni \gls{mrp}.
     \item \textbf{Costruzione task} (\texttt{PlanningInput}): trasforma i record di database in strutture \texttt{TaskData} con durata calcolata (\texttt{setup\_seconds + qta $\times$ unit\_seconds}) e relazioni di precedenza tra fasi dello stesso job, derivate dal \texttt{phase\_number}.
     \item \textbf{Costruzione modello CP-SAT} (\texttt{ModelBuilder}): crea per ogni task le variabili CP-SAT (\texttt{IntVar start}, \texttt{IntVar end}, \texttt{IntervalVar interval}), aggiunge i vincoli di non sovrapposizione per macchina, i vincoli di capacità cumulativa per gruppo macchina, le precedenze tra fasi e i vincoli di calendario lavorativo giornaliero.
     \item \textbf{Risoluzione} (\texttt{TwoPhaseSolver}): esegue la pipeline a due fasi descritta nella sezione~\ref{subsec:twophase}.
@@ -111,7 +111,7 @@ Il flusso di esecuzione di una pianificazione segue le fasi descritte di seguito
 Il \texttt{TwoPhaseSolver} implementa una pipeline di risoluzione a due fasi per gestire la complessità del problema in presenza di calendari lavorativi e vincoli multipli.
 
 \begin{itemize}
-    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode::Phase1Light}), senza i vincoli di calendario più stringenti. Produce una soluzione iniziale in tempi brevi.
+    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode:: Phase1Light}), senza i vincoli di calendario più stringenti. Produce una soluzione iniziale in tempi brevi.
     \item \textbf{Hinting}: la soluzione della fase 1 viene estratta tramite \texttt{SolutionHintBuilder} e iniettata come suggerimento (\gls{warmstart}) nel modello completo, guidando il solver verso la regione dello spazio di ricerca più promettente.
     \item \textbf{Fase 2 (Full)}: ottimizza sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce calendari giornalieri per macchina, vincoli di capacità cumulativa e funzione obiettivo multi-criterio (lateness totale dei job + makespan come criterio secondario).
 \end{itemize}
@@ -126,7 +126,7 @@ Qualora la fase 2 non produca una soluzione migliore entro il timeout configurat
 
 Il pattern Observer definisce una dipendenza uno-a-molti tra oggetti, in modo che quando un oggetto cambia stato tutti i suoi osservatori vengano notificati automaticamente. Nel sistema sviluppato, il pattern è implementato tramite l'interfaccia astratta \texttt{IPlanningObserver} (namespace \texttt{core}).
 
-L'interfaccia dichiara i metodi di notifica per tutti gli eventi rilevanti del ciclo di vita di una pianificazione: avvio del run (\texttt{onRunStarted}), cambio di fase (\texttt{onPhaseChanged}), messaggi di log (\texttt{onLogMessage}), aggiornamenti KPI (\texttt{onKpiUpdated}), task schedulati (\texttt{onTaskScheduled}), warning di validazione (\texttt{onValidationWarning}) e completamento del run (\texttt{onRunFinished}). Metodi aggiuntivi per la telemetria realtime del solver (\texttt{onSolverTelemetry}, \texttt{onSolverIncumbent}, \texttt{onTaskBatch}, ecc.) sono definiti con implementazione di default no-op, preservando la retro-compatibilità con le implementazioni esistenti.
+L'interfaccia dichiara i metodi di notifica per tutti gli eventi rilevanti del ciclo di vita di una pianificazione: avvio del run (\texttt{onRunStarted}), cambio di fase (\texttt{onPhaseChanged}), messaggi di log (\texttt{onLogMessage}), aggiornamenti KPI (\texttt{onKpiUpdated}), task schedulati (\texttt{onTaskScheduled}), warning di validazione (\texttt{onValidationWarning}) e completamento del run (\texttt{onRunFinished}). Metodi aggiuntivi per la telemetria realtime del solver (\texttt{onSolverTelemetry}, \texttt{onSolver- Incumbent}, \texttt{onTaskBatch}, ecc.) sono definiti con implementazione di default no-op, preservando la retro-compatibilità con le implementazioni esistenti.
 
 \begin{listing}[H]
 \begin{minted}{cpp}
@@ -259,7 +259,7 @@ La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il 
 \subsection{ModelBuilder}
 \label{subsec:modelbuilder}
 
-\texttt{ModelBuilder} costruisce il modello CP-SAT completo per la pianificazione. La funzione principale \texttt{buildGroupCapacityModel} crea le variabili di intervallo per ogni task o chunk di task, applica i vincoli di non sovrapposizione sulle macchine (\texttt{AddNoOverlap}), i vincoli di capacità cumulativa sui gruppi di macchine (\texttt{AddCumulative}), i vincoli di precedenza tra fasi dello stesso job e i vincoli del calendario lavorativo giornaliero per macchina. La funzione \texttt{applyStandardObjective} aggiunge la funzione obiettivo al modello: minimizzazione della lateness totale dei job se sono presenti date di consegna, altrimenti minimizzazione del makespan.
+\texttt{ModelBuilder} costruisce il modello CP-SAT completo per la pianificazione. La funzione principale \texttt{buildGroupCapacityModel} crea le variabili di intervallo per ogni task (un solo intervallo per \texttt{TaskData}), applica i vincoli di non sovrapposizione sulle macchine (\texttt{AddNoOverlap}), i vincoli di capacità cumulativa sui gruppi di macchine (\texttt{AddCumulative}), i vincoli di precedenza tra fasi dello stesso job e i vincoli del calendario lavorativo. Per gestire i periodi non lavorativi (notti, weekend, festività) senza suddividere i task, il modello adotta un \textit{asse tempo-lavorativo} (\textit{working-time axis}): ogni task è definito su una scala temporale dalla quale i periodi di chiusura sono esclusi, dove quindi l'intervallo è sempre contiguo. Le variabili di inizio e fine in tempo assoluto sono poi collegate a tale scala da una funzione a gradini monotona, così che un task possa attraversare i gap di calendario senza essere spezzato; in tempo assoluto la differenza tra fine e inizio può perciò superare la durata di lavoro effettiva. La funzione \texttt{applyStandardObjective} aggiunge la funzione obiettivo al modello: minimizzazione della lateness totale dei job se sono presenti date di consegna, altrimenti minimizzazione del makespan.
 
 \subsection{TwoPhaseSolver}
 \label{subsec:twophasesolver}

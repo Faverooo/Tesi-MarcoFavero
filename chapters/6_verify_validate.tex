@@ -64,10 +64,6 @@ Il test \texttt{test\_verify\_horizon} verifica che tutti i task schedulati term
 
 Il test \texttt{test\_verify\_model\_params} verifica che le impostazioni di configurazione del solver (timeout, strategia, limiti) vengano correttamente propagate al modello CP-SAT attraverso \texttt{SolverConfig}.
 
-\subsection{Test del chunking dei task}
-
-Il test \texttt{test\_verify\_chunking} verifica il meccanismo di \textit{task splitting} implementato in \texttt{TaskSplitter}: task di lunga durata vengono suddivisi in sotto-intervalli per adattarsi alle finestre del calendario lavorativo. I casi testati includono task che non richiedono suddivisione, task che vengono spezzati in più blocchi e la corretta conservazione della durata totale dopo il chunking.
-
 \subsection{Test degli ordini fissi}
 
 Il test \texttt{test\_verify\_fixed\_orders} verifica la gestione degli ordini già confermati (\textit{fixed orders}), cioè task con posizione temporale prefissata che il solver non deve spostare. Si verifica che i task fissi mantengano esattamente il loro slot originale e che i task liberi vengano schedulati senza sovrapporsi con essi.
@@ -142,8 +138,6 @@ La tabella seguente riassume i test realizzati, il componente verificato e l'esi
 \texttt{test\_verify\_horizon} & Rispetto dell'orizzonte temporale & Superato \\
 \hline
 \texttt{test\_verify\_model\_params} & Propagazione configurazione solver & Superato \\
-\hline
-\texttt{test\_verify\_chunking} & Suddivisione task su finestre calendario & Superato \\
 \hline
 \texttt{test\_verify\_fixed\_orders} & Ordini confermati a posizione fissa & Superato \\
 \hline
