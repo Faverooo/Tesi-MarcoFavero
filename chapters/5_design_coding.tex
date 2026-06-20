@@ -278,6 +278,20 @@ La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il 
 \subsection{GanttWidget}
 \label{subsec:ganttwidget}
 
-\texttt{GanttWidget} è un widget Qt personalizzato che visualizza il diagramma di Gantt del piano generato. Il rendering è realizzato con \texttt{QPainter}: sull'asse orizzontale è rappresentata la linea temporale del piano; sull'asse verticale sono elencate le macchine. Ogni task schedulato è disegnato come un blocco colorato sulla riga della macchina assegnata, con tooltip che mostrano il dettaglio dell'ordine. 
+\texttt{GanttWidget} è un widget Qt personalizzato che visualizza il diagramma di Gantt del piano generato. Il rendering è realizzato con \texttt{QPainter}: sull'asse orizzontale è rappresentata la linea temporale del piano; sull'asse verticale sono elencate le macchine. Ogni task schedulato è disegnato come un blocco colorato sulla riga della macchina assegnata, con tooltip che mostrano il dettaglio dell'ordine, come si può vedere nella figura~\ref{fig:gantcpp}. Il gant in cpp è per il debug, all'utente finale viene mostrato il gant in php, come si può vedere nella figura~\ref{fig:gantphp}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[alt={Grafico Gantt in cpp}, width=1\columnwidth]{img/varie/cppgant.jpg}
+    \caption{Gantt in cpp}
+    \label{fig:gantcpp}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[alt={Grafico Gantt in php}, width=1\columnwidth]{img/varie/phpgant.jpg}
+    \caption{Gantt in php}
+    \label{fig:gantphp}
+\end{figure}
 
 \newpage
