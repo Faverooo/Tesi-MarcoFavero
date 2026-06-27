@@ -25,7 +25,7 @@ Le loro soluzioni attualmente sono:
 \end{itemize}
 
 \section{L'idea}
-Il progetto Brain nasce come software \gls{erp} personalizzato, sviluppato su commissione dell'azienda Falmec S.p.A., con l'obiettivo di ottimizzare i processi produttivi e migliorare la gestione operativa aziendale.
+Il progetto Brain nasce come software \gls{erp} personalizzato, sviluppato su commissione di Falmec S.p.A., azienda manifatturiera specializzata nella produzione di cappe da cucina, con l'obiettivo di ottimizzare i processi produttivi e migliorare la gestione operativa aziendale.
 
 Il sistema è progettato per incrementare l'efficienza produttiva, consentire il monitoraggio in tempo reale delle attività e supportare una gestione più accurata delle risorse aziendali.
 
@@ -40,7 +40,20 @@ materiali provenienti da terzi e tutti i componenti necessari alla realizzazione
 tempi di lavorazione e scadenze, con l'obiettivo di ridurre i tempi di inattività e massimizzare la produttività.
 \end{itemize}
 
-L'obiettivo principale del progetto è trasformare il processo produttivo da un approccio reattivo a uno proattivo. Attraverso la previsione degli ordini, il sistema consente infatti di anticipare la produzione e organizzare in anticipo le risorse necessarie, migliorando l'efficienza operativa e riducendo i ritardi nelle consegne.
+Tradizionalmente molte aziende manifatturiere, Falmec S.p.A. inclusa, operano secondo un approccio \textit{reattivo}: la produzione viene pianificata solo nel momento in cui gli ordini vengono effettivamente ricevuti, reagendo di volta in volta alle richieste in arrivo. Questa modalità di gestione tende a generare diverse inefficienze, come la saturazione improvvisa dei reparti, i tempi di inattività dei macchinari, la difficoltà nel rispettare le date di consegna concordate e una scarsa visibilità sull'effettiva disponibilità delle risorse.
+
+L'obiettivo principale del progetto è trasformare questo processo da un approccio reattivo a uno \textit{proattivo}. Attraverso la previsione della domanda, il sistema è in grado di anticipare il fabbisogno produttivo e di organizzare per tempo le risorse necessarie (macchinari, materiali e manodopera), riducendo i tempi morti e i ritardi nelle consegne. A valle della previsione, il modulo di schedulazione a capacità finita colloca le lavorazioni sulle risorse disponibili nel rispetto dei vincoli produttivi (capacità dei reparti, sequenze tra le fasi, calendari di lavoro), mentre la stima \gls{atp} consente di comunicare al cliente una data di disponibilità realistica per ciascun ordine.
+
+Il presente documento si concentra in particolare sul primo di questi due aspetti, ovvero sul motore di schedulazione a capacità finita, che costituisce il cuore computazionale dell'intero sistema e che ha rappresentato l'oggetto principale del lavoro svolto durante lo stage.
+
+\section{Le principali problematiche}
+La realizzazione di un motore di schedulazione a capacità finita per un contesto produttivo reale comporta una serie di problematiche, di natura sia algoritmica sia legata al dominio applicativo.
+
+La difficoltà principale è di tipo computazionale: il problema affrontato appartiene alla classe dei problemi di ottimizzazione combinatoria, notoriamente complessi. Il solver deve infatti collocare nel tempo diverse migliaia di lavorazioni tenendo conto simultaneamente di numerosi vincoli, tra cui i tempi di attrezzaggio (\gls{changeover}) tra articoli diversi, i calendari e gli orari di lavoro delle singole macchine e le relazioni di precedenza tra le fasi di uno stesso ordine. Il numero di soluzioni possibili cresce rapidamente al crescere della dimensione dell'istanza, rendendo impraticabile un approccio di ricerca esaustiva; a ciò si aggiunge il problema dell'occupazione di memoria, che nelle prime versioni del prototipo arrivava a saturare le risorse disponibili sulle istanze di maggiori dimensioni.
+
+Una seconda categoria di problematiche riguarda la complessità del dominio. Le regole che governano una produzione reale sono molto più articolate di quanto appaia a una prima analisi e spesso non sono formalizzate in alcuna documentazione, ma derivano dalla prassi operativa dell'azienda, ad esempio cicli di produzione possibili per un articolo, ordini emessi da fonti diverse, ordini con specifiche richieste; una parte significativa del lavoro è stata perciò dedicata alla comprensione e alla traduzione in vincoli formali del modello. Vi è inoltre la necessità di integrare il motore di schedulazione con l'applicazione gestionale esistente, sviluppata in un linguaggio differente, il che impone precisi vincoli sulle modalità di comunicazione e sul formato dei dati scambiati.
+
+Le soluzioni adottate per affrontare tali problematiche, basate sull'impiego del solver \gls{cpsat} della libreria OR-Tools e su un'architettura modulare, sono descritte in dettaglio nei capitoli successivi.
 
 \section{Il mio ruolo}
 Il team di sviluppo del progetto Brain era composto da 3 persone, a cui mi sono unito durante il mio periodo di stage. Il mio ruolo all'interno del team, a progetto 
@@ -49,15 +62,15 @@ In particolare il solver è scritto in C++ e viene integrato tramite un'\gls{api
 
 \section{Organizzazione del testo}
 \begin{description}
-    \item[{\hyperref[chap:descrizione-stage]{Il secondo capitolo}}] descrive il contesto aziendale di Spazio Dev S.r.l., la metodologia di sviluppo Agile adottata con framework Scrum e sprint settimanali, gli strumenti di issue tracking (Plane), controllo di versione (Git/Gitea con flusso GitFlow) e il processo di code review.
+    \item[{\hyperref[chap:descrizione-stage]{Capitolo~\ref*{chap:descrizione-stage}}}] descrive il contesto aziendale di Spazio Dev S.r.l., la metodologia di sviluppo Agile adottata con framework Scrum e sprint settimanali, gli strumenti di issue tracking (Plane), controllo di versione (Git/Gitea con flusso GitFlow) e il processo di code review.
 
-    \item[{\hyperref[chap:analisi-requisiti]{Il terzo capitolo}}] illustra l'analisi degli utenti del sistema, i diagrammi dei casi d'uso con le relative descrizioni dettagliate, la struttura gerarchica dei casi d'uso e il tracciamento dei requisiti funzionali e non funzionali.
+    \item[{\hyperref[chap:analisi-requisiti]{Capitolo~\ref*{chap:analisi-requisiti}}}] illustra l'analisi degli utenti del sistema, i diagrammi dei casi d'uso con le relative descrizioni dettagliate, la struttura gerarchica dei casi d'uso e il tracciamento dei requisiti funzionali e non funzionali.
 
-    \item[{\hyperref[chap:progettazione-codifica]{Il quarto capitolo}}] presenta le scelte tecnologiche adottate (C++20, Qt6, OR-Tools \gls{cpsat}, Drogon), l'architettura del sistema articolata in tre target applicativi con un nucleo di pianificazione condiviso, i design pattern impiegati e la descrizione dei principali componenti implementati.
+    \item[{\hyperref[chap:progettazione-codifica]{Capitolo~\ref*{chap:progettazione-codifica}}}] presenta le scelte tecnologiche adottate (C++20, Qt6, OR-Tools \gls{cpsat}, Drogon), l'architettura del sistema articolata in tre target applicativi con un nucleo di pianificazione condiviso, i design pattern impiegati e la descrizione dei principali componenti implementati.
 
-    \item[{\hyperref[chap:verifica-validazione]{Il quinto capitolo}}] descrive la strategia di testing strutturata su due livelli: i test di unità e integrazione automatizzati, scritti come eseguibili C++ e integrabili nella pipeline CI, e la validazione funzionale condotta con il tutor aziendale su dati di produzione reali.
+    \item[{\hyperref[chap:verifica-validazione]{Capitolo~\ref*{chap:verifica-validazione}}}] descrive la strategia di testing strutturata su due livelli: i test di unità e integrazione automatizzati, scritti come eseguibili C++ e integrabili nella pipeline CI, e la validazione funzionale condotta con il tutor aziendale su dati di produzione reali.
 
-    \item[{\hyperref[chap:conclusioni]{Il sesto capitolo}}] riporta il consuntivo finale delle 300 ore di stage, lo stato di raggiungimento degli obiettivi obbligatori, desiderabili e facoltativi, le conoscenze tecniche e metodologiche acquisite e una valutazione personale dell'esperienza.
+    \item[{\hyperref[chap:conclusioni]{Capitolo~\ref*{chap:conclusioni}}}] riporta il consuntivo finale delle 300 ore di stage, lo stato di raggiungimento degli obiettivi obbligatori, desiderabili e facoltativi, le conoscenze tecniche e metodologiche acquisite e una valutazione personale dell'esperienza.
 \end{description}
 
 Riguardo la stesura del testo, relativamente al documento sono state adottate le seguenti convenzioni tipografiche:

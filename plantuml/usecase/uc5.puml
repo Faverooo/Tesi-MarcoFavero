@@ -23,10 +23,6 @@ rectangle "UC5 - Gestione storico pianificazioni" {
 op --> UC5
 UC5 ..> UC51 : <<include>>
 UC5 ..> UC52 : <<include>>
-
-note bottom of UC52
-  Precondizione: l'Operatore
-  deve trovarsi nell'elenco
-  storico (UC5.1)
-end note
+    UC51 -[hidden]left-> UC52
+    UC52 -[hidden]left-> UC53
 @enduml

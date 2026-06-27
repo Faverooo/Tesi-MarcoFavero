@@ -6,7 +6,7 @@
 \section{Strategia di testing}
 \label{sec:strategia-testing}
 
-Data la natura del sistema --- un modulo di ottimizzazione combinatoria senza interfacce web classiche né framework di testing integrati --- la strategia di verifica è stata strutturata su due livelli distinti:
+Data la natura del sistema, ovvero un modulo di ottimizzazione combinatoria senza interfacce web classiche né framework di testing integrati, la strategia di verifica è stata strutturata su due livelli distinti:
 
 \begin{itemize}
     \item \textbf{Test di unità e di integrazione}: eseguibili C++ autonomi, compilati come target separati tramite CMake, che verificano il comportamento del solver CP-SAT su scenari sintetici costruiti senza connessione al database. Questi test non dipendono dall'ambiente di produzione e possono essere eseguiti in modo ripetibile anche in pipeline \gls{ci}.
@@ -37,7 +37,7 @@ Il test \texttt{test\_verify\_due\_dates} verifica il comportamento del solver i
 
 \begin{enumerate}
     \item \textbf{Due date raggiungibile}: un task da 60 minuti con scadenza a 480 minuti dal piano deve terminare entro la scadenza (\texttt{end\_minutes <= 480}) con lateness nulla.
-    \item \textbf{Due date irraggiungibile}: un task da 120 minuti con scadenza a 60 minuti non può terminare in tempo. Il solver deve comunque produrre una soluzione ammissibile, con lateness positiva --- il modello penalizza il ritardo anziché dichiarare il problema infeasible.
+    \item \textbf{Due date irraggiungibile}: un task da 120 minuti con scadenza a 60 minuti non può terminare in tempo. Il solver deve comunque produrre una soluzione ammissibile, con lateness positiva, poiché il modello penalizza il ritardo anziché dichiarare il problema infeasible.
     \item \textbf{Due job con scadenze diverse}: il job con scadenza più ravvicinata deve essere schedulato prima.
     \item \textbf{Task senza due date}: il solver deve essere comunque feasible quando la data di consegna è assente (campo opzionale).
     \item \textbf{Due job sulla stessa macchina}: il job più urgente ottiene priorità di scheduling rispetto al meno urgente.
@@ -73,10 +73,10 @@ Il test \texttt{test\_verify\_fixed\_orders} verifica la gestione degli ordini g
 Il test \texttt{test\_changeover\_repro} verifica il comportamento del modello di costi di \gls{changeover} (tempi di attrezzaggio tra articoli diversi sulla stessa macchina) in condizioni critiche. Lo scenario principale replica un caso produzione reale: macchina con finestre lavorative da 140 minuti e setup massimo da 248 minuti. Quattro scenari coprono le combinazioni rilevanti:
 
 \begin{itemize}
-    \item \textbf{S0}: baseline senza changeover --- atteso feasible come riferimento.
+    \item \textbf{S0}: baseline senza changeover, atteso feasible come riferimento.
     \item \textbf{S1}: changeover attivo, macchina esplicita con setup superiore alla finestra (verifica che il solver gestisca correttamente slot multipli).
     \item \textbf{S2}: changeover attivo, task con scelta della macchina tra alternative (una con matrice di changeover, una senza).
-    \item \textbf{S3}: task fuori dalla finestra di changeover --- il setup diventa fisso e non ottimizzabile.
+    \item \textbf{S3}: task fuori dalla finestra di changeover, per cui il setup diventa fisso e non ottimizzabile.
 \end{itemize}
 
 \subsection{Test del calendario lavorativo}

@@ -24,6 +24,16 @@ rectangle "Sistema di pianificazione produzione" {
     (UC6\nModifica\npriorita operative) as UC6
     (UC7\nStima ATP\nnuovo ordine) as UC7
     (UC8\nConsultazione stato\nrun via API) as UC8
+    
+    ' --- TRUCCO PER L'ORDINE VERTICALE IN LEFT-TO-RIGHT ---
+    ' Usiamo "right" perché la direzione principale è ruotata
+    UC1 -[hidden]left-> UC2
+    UC3 -[hidden]left-> UC4
+    UC4 -[hidden]left-> UC5
+    UC5 -[hidden]left-> UC6
+    UC6 -[hidden]left-> UC7
+    UC7 -[hidden]left-> UC2
+    UC2 -[hidden]left-> UC8
 }
 
 op --> UC1
@@ -36,4 +46,5 @@ op --> UC7
 
 erp --> UC2
 erp --> UC8
+
 @enduml

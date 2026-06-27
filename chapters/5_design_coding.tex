@@ -56,7 +56,7 @@ gRPC è un framework open source per chiamate a procedure remote, sviluppato da 
 
 Nel progetto, gRPC non è un'interfaccia generica: è l'opzione di deployment che consente di delegare \textbf{esclusivamente la fase di calcolo CP-SAT} a un server dedicato. Il target \texttt{erpai\_grpc\_solver} espone il servizio \texttt{PlanningService} con il metodo \texttt{RunPlanning}, che riceve il modello di scheduling già costruito dal chiamante e ne esegue la risoluzione, restituendo in streaming gli aggiornamenti di stato (KPI, log, soluzione incumbent).
 
-In questo scenario, il modulo chiamante --- che sia il server HTTP, il daemon o l'applicazione Qt --- continua a eseguire internamente tutte le fasi a monte: caricamento dei dati da MariaDB, costruzione del modello CP-SAT tramite \texttt{ModelBuilder} e orchestrazione del flusso tramite \texttt{PlanningRunner}. La delega al server gRPC riguarda unicamente la parte computazionalmente più onerosa, permettendo di isolarla su una macchina ad alte prestazioni senza modificare la logica applicativa del chiamante. La classe \texttt{RemoteSolverClient} incapsula questa comunicazione in modo trasparente.
+In questo scenario, il modulo chiamante, che sia il server HTTP, il daemon o l'applicazione Qt, continua a eseguire internamente tutte le fasi a monte: caricamento dei dati da MariaDB, costruzione del modello CP-SAT tramite \texttt{ModelBuilder} e orchestrazione del flusso tramite \texttt{PlanningRunner}. La delega al server gRPC riguarda unicamente la parte computazionalmente più onerosa, permettendo di isolarla su una macchina ad alte prestazioni senza modificare la logica applicativa del chiamante. La classe \texttt{RemoteSolverClient} incapsula questa comunicazione in modo trasparente.
 
 \subsubsection{Drogon}
 
@@ -89,7 +89,7 @@ Tre target applicativi condividono lo stesso nucleo:
     \item \textbf{erpai\_grpc\_solver}: server gRPC opzionale che, se attivo, riceve il modello CP-SAT già costruito dal modulo chiamante ed esegue la sola fase di calcolo su una macchina dedicata.
 \end{itemize}
 
-Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità. In entrambi i casi --- che il transport layer sia HTTP o gRPC --- il caricamento dei dati, la costruzione del modello e l'orchestrazione del flusso avvengono nel modulo principale; la variabile è solo come e dove viene eseguita la fase di risoluzione CP-SAT.
+Questa separazione garantisce che la logica di pianificazione possa essere testata, eseguita e integrata indipendentemente dal canale di accesso, rispettando il principio di separazione delle responsabilità. In entrambi i casi, che il transport layer sia HTTP o gRPC, il caricamento dei dati, la costruzione del modello e l'orchestrazione del flusso avvengono nel modulo principale; la variabile è solo come e dove viene eseguita la fase di risoluzione CP-SAT.
 
 \subsection{Pipeline di pianificazione}
 \label{subsec:pipeline}
@@ -111,12 +111,12 @@ Il flusso di esecuzione di una pianificazione segue le fasi descritte di seguito
 Il \texttt{TwoPhaseSolver} implementa una pipeline di risoluzione a due fasi per gestire la complessità del problema in presenza di calendari lavorativi e vincoli multipli.
 
 \begin{itemize}
-    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode:: Phase1Light}), senza i vincoli di calendario più stringenti. Produce una soluzione iniziale in tempi brevi.
-    \item \textbf{Hinting}: la soluzione della fase 1 viene estratta tramite \texttt{SolutionHintBuilder} e iniettata come suggerimento (\gls{warmstart}) nel modello completo, guidando il solver verso la regione dello spazio di ricerca più promettente.
-    \item \textbf{Fase 2 (Full)}: ottimizza sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce calendari giornalieri per macchina, vincoli di capacità cumulativa e funzione obiettivo multi-criterio (lateness totale dei job + makespan come criterio secondario).
+    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode::Phase1Light}), privo dei vincoli di calendario lavorativo. L'obiettivo è trovare rapidamente una soluzione fattibile, minimizzando il makespan oppure la sola fattibilità a seconda della configurazione, così da disporre in tempi brevi di una base di partenza per la fase successiva.
+    \item \textbf{Hinting}: i tempi di inizio risolti nella fase 1 e le macchine effettivamente scelte vengono trasferiti, tramite la funzione \texttt{applyHintToModel}, come suggerimento al modello completo della fase 2. Poiché il modello \textit{light} lavora su un tempo continuo coincidente con l'asse tempo-lavorativo della fase 2, i valori di inizio sono mappati direttamente su quest'ultimo, da cui il solver deriva per propagazione le restanti variabili. L'hint guida così il solver verso una regione promettente dello spazio di ricerca.
+    \item \textbf{Fase 2 (Full)}: ottimizza la lateness totale dei job sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce i calendari giornalieri per macchina e i tempi di attrezzaggio dinamici, oltre a includere tutti i vincoli di precedenza e di capacità cumulativa.
 \end{itemize}
 
-Qualora la fase 2 non produca una soluzione migliore entro il timeout configurato, il sistema blocca il salvataggio a database. (\textit{fallback}).
+Prima di avviare la risoluzione della fase 2 il contesto e la risposta della fase 1 vengono rilasciati: l'hint è già stato trasferito e mantenerli in memoria raddoppierebbe inutilmente il picco di RAM proprio nel momento di massimo consumo, quando i diversi worker del solver duplicano il modello. Per questa ragione non è previsto alcun \textit{fallback} alla soluzione della fase 1: se la fase 2 non raggiunge una soluzione fattibile, il risultato viene marcato come non valido e non viene salvato a database. Quando invece la fase 2 produce una soluzione fattibile, questa viene marcata come provvisoria, in attesa della validazione successiva.
 
 \section{Design Pattern adottati}
 \label{sec:design-pattern}
@@ -211,7 +211,7 @@ signals:
 \subsection{Repository}
 \label{subsec:repository}
 
-Il pattern Repository fornisce un'astrazione tra la logica applicativa e il layer di persistenza dei dati. L'interfaccia \texttt{RunStoreAccess} definisce il contratto per l'accesso allo storico locale. La classe \texttt{LocalRunStore} implementa tale contratto utilizzando SQLite come motore di persistenza.
+Il pattern Repository fornisce un'astrazione tra la logica applicativa e il layer di persistenza dei dati, esponendo l'accesso allo storico tramite un insieme di operazioni di alto livello anziché tramite query SQL disseminate nel codice. Nel sistema il ruolo di repository è svolto dalla classe \texttt{LocalRunStore}, che incapsula il motore SQLite dietro metodi \gls{crud} operanti su record di dominio (\texttt{RunRecord}, \texttt{LogRecord}, \texttt{ScheduledTaskInfo}). L'header \texttt{RunStoreAccess} non definisce un contratto astratto, ma fornisce la funzione \texttt{appRunStore()} che restituisce l'unica istanza condivisa di \texttt{LocalRunStore}: questo accesso a singolo punto (\textit{singleton}) garantisce che tutte le unità di traduzione dell'applicazione lavorino sullo stesso file di database, evitando aperture multiple e conflitti di lock.
 
 \texttt{LocalRunStore} gestisce tre tabelle: \texttt{runs} (metadati e KPI di ogni pianificazione), \texttt{run\_logs} (messaggi di log associati al run) e \texttt{run\_tasks} (task schedulati con inizio, fine e macchina assegnata). Tutte le operazioni di scrittura e lettura sono protette da un \texttt{std::mutex}, garantendo la correttezza in caso di accesso concorrente da più thread.
 
@@ -263,7 +263,7 @@ La separazione tra \texttt{core}, \texttt{planning} e \texttt{apps} riflette il 
 \subsection{TwoPhaseSolver}
 \label{subsec:twophasesolver}
 
-\texttt{TwoPhaseSolver} implementa la funzione \texttt{solveTwoPhase}, che coordina le due fasi di risoluzione descritte nella sezione~\ref{subsec:twophase}. Notifica l'observer ad ogni cambio di fase e al termine di ciascuna risoluzione, consentendo all'interfaccia grafica di mostrare lo stato di avanzamento in tempo reale. La struttura \texttt{SchedulerBenchResult} registra per ogni esecuzione lo stato del solver (\texttt{OPTIMAL}, \texttt{FEASIBLE}, \texttt{INFEASIBLE}), il valore dell'obiettivo, il bound migliore e il tempo impiegato; la funzione \texttt{selectBestBenchResult} determina il miglior risultato secondo una gerarchia di criteri: ottimalità, obiettivo minore, gap assoluto minore, tempo minore.
+\texttt{TwoPhaseSolver} implementa la funzione \texttt{solveTwoPhase}, che coordina le due fasi di risoluzione descritte nella sezione~\ref{subsec:twophase}. Il comportamento a due fasi è quello predefinito (flag \texttt{feasibility\_first}); in alternativa il solver può eseguire un'unica passata direttamente sul modello completo (\textit{one-shot}). Durante e al termine di ciascuna fase la funzione notifica l'observer con la telemetria del solver (stato, obiettivo, bound, tempo), consentendo all'interfaccia grafica di mostrare l'avanzamento in tempo reale.
 
 \subsection{LocalRunStore}
 \label{subsec:localrunstore}

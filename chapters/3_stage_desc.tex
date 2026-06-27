@@ -5,7 +5,7 @@
 
 Nonostante Spazio Dev sia una realtà di recente fondazione, l'organizzazione interna è caratterizzata da processi ben definiti e da una forte attenzione alla qualità del lavoro svolto e alla soddisfazione del cliente.
 
-Durante il periodo di stage ho collaborato con un team composto da tre persone. In un contesto di dimensioni ridotte, la comunicazione costante e il coordinamento tra i membri del gruppo risultano fondamentali per rispondere efficacemente alle esigenze del cliente e garantire il successo del progetto.
+Durante il periodo di stage, come anticipato, ho collaborato con un team composto da tre persone. In un contesto di dimensioni ridotte, la comunicazione costante e il coordinamento tra i membri del gruppo risultano fondamentali per rispondere efficacemente alle esigenze del cliente e garantire il successo del progetto.
 
 \subsection{Modello Agile}
 
@@ -55,9 +55,9 @@ Il flusso di sviluppo adottato segue il modello \gls{gitflow}, articolato nei se
 
 \subsection{Il solver}
 
-Come anticipato, il progetto proposto dal cliente presenta un elevato livello di complessità e richiede uno sviluppo continuativo che coinvolge il team da diversi mesi. L'attività svolta durante il periodo di stage si è concentrata in particolare sullo sviluppo del \textit{solver di scheduling}, ovvero il componente software responsabile della risoluzione di problemi di ottimizzazione legati alla pianificazione delle attività e all'allocazione delle risorse disponibili.
+Il progetto Brain, commissionato da Falmec S.p.A. (azienda manifatturiera specializzata nella produzione di cappe da cucina) e introdotto nel capitolo~\ref{chap:introduzione}, presenta un elevato livello di complessità. Le dimensioni dello stabilimento produttivo e la complessità dei relativi processi richiedono uno sviluppo continuativo, che coinvolge il team da diversi mesi. L'attività svolta durante il periodo di stage si è concentrata in particolare sullo sviluppo del \textit{solver di scheduling}, ovvero il componente software responsabile della risoluzione di problemi di ottimizzazione legati alla pianificazione delle attività e all'allocazione delle risorse disponibili.
 
-Il solver, sviluppato in C++, costituisce il nucleo computazionale del sistema e ha il compito di individuare soluzioni ottimali o quasi ottimali nel rispetto di un insieme di vincoli definiti dal dominio applicativo. Per consentirne l'integrazione con l'applicazione principale --- realizzata in PHP --- il modulo è esposto tramite un'API REST sviluppata con il framework Drogon, che rappresenta l'interfaccia di produzione principale: riceve la richiesta di pianificazione, esegue l'intero flusso (caricamento dati ERP, costruzione del modello, risoluzione) e restituisce il piano al chiamante.
+Il solver, sviluppato in C++, costituisce il nucleo computazionale del sistema e ha il compito di individuare soluzioni ottimali o quasi ottimali nel rispetto di un insieme di vincoli definiti dal dominio applicativo. Per consentirne l'integrazione con l'applicazione principale, realizzata in PHP, il modulo è esposto tramite un'API REST sviluppata con il framework Drogon, che rappresenta l'interfaccia di produzione principale: riceve la richiesta di pianificazione, esegue l'intero flusso (caricamento dati ERP, costruzione del modello, risoluzione) e restituisce il piano al chiamante.
 
 Parallelamente allo sviluppo del modulo, durante lo stage è stata realizzata un'applicazione desktop basata su Qt con finalità di debug e testing. Grazie alla sua interfaccia grafica interattiva, questo strumento ha permesso di visualizzare in tempo reale il \gls{gantt}, i \gls{kpi} e i log del solver durante le sessioni di sviluppo, facilitando l'individuazione di anomalie e velocizzando le iterazioni implementative.
 

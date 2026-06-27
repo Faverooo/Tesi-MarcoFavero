@@ -19,6 +19,10 @@ rectangle "UC3 - Monitoraggio esecuzione" {
     (UC3.1\nConsultazione\nlog di esecuzione) as UC31
     (UC3.2\nConsultazione\nKPI in tempo reale) as UC32
     (UC3.3\nConsultazione\ntelemetria del solver) as UC33
+    
+    ' Ancoraggio verticale per i sotto-casi
+    UC31 -[hidden]left-> UC32
+    UC32 -[hidden]left-> UC33
 }
 
 op --> UC3

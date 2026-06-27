@@ -19,6 +19,9 @@ rectangle "UC4 - Consultazione risultati" {
     (UC4.1\nVisualizzazione\ndiagramma di Gantt) as UC41
     (UC4.2\nVisualizzazione\ntask pianificati) as UC42
     (UC4.3\nAnalisi qualita\ndel piano) as UC43
+    
+    UC41 -[hidden]left-> UC42
+    UC42 -[hidden]left-> UC43
 }
 
 op --> UC4
