@@ -659,7 +659,8 @@ Le funzionalità del sistema sono organizzate nei seguenti casi d'uso.
     \item \textbf{Attore principale:} Sistema ERP.
     \item \textbf{Scenario principale:}
     \begin{enumerate}
-        \item Il Sistema ERP invia una richiesta HTTP GET all'endpoint \texttt{/api/planning/status/\{run\_id\}} con l'identificativo del run ricevuto in UC2.B.
+        \item Il Sistema ERP invia una richiesta HTTP GET all'endpoint \\
+        \texttt{/api/planning/status/\{run\_id\}} con l'identificativo del run ricevuto in UC2.B.
         \item Il server restituisce lo stato corrente del run (\texttt{Queued}, \texttt{Running}, \texttt{Finished} o \texttt{Failed}) e i KPI disponibili (makespan, lateness, numero di task schedulati).
         \item Se il run è ancora in corso, il Sistema ERP ripete la richiesta dopo un intervallo fino al completamento.
         \item Quando lo stato è \texttt{Finished}, il Sistema ERP elabora i dati del piano ricevuti nella risposta.
@@ -800,14 +801,12 @@ RQN-4 & La pianificazione deve rispettare i vincoli del modello di schedulazione
 \hline
 RQN-5 & Le esecuzioni devono essere tracciabili nello storico locale & UC5.1, UC5.2 & N \\
 \hline
-
 \caption{Tabella del tracciamento dei requisiti qualitativi.}
 \label{tab:requisiti_qualitativi}
 \end{longtable}
 \end{center}
-
+\vspace{0.15cm}
 \subsection{Requisiti di vincolo}
-
 \begin{center}
 \rowcolors{1}{}{tableGray}
 \begin{longtable}{|p{2.1cm}|p{6.9cm}|p{2.0cm}|p{2.0cm}|}
@@ -833,7 +832,6 @@ RVN-4 & Lo storico locale deve essere persistito tramite SQLite & UC5.1, UC5.2 &
 \hline
 RVN-5 & L'interfaccia HTTP di produzione deve essere realizzata con il framework Drogon & UC2.B & N \\
 \hline
-
 \caption{Tabella del tracciamento dei requisiti di vincolo.}
 \label{tab:requisiti_vincolo}
 \end{longtable}

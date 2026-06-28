@@ -1,8 +1,6 @@
 \chapter{Progettazione e codifica}
 \label{chap:progettazione-codifica}
 
-\textit{In questo capitolo vengono descritte le scelte tecnologiche, architetturali e implementative adottate durante lo sviluppo del sistema. Viene prima fornita una panoramica delle tecnologie e degli strumenti utilizzati, seguita dall'illustrazione dell'architettura generale, dei design pattern applicati e dei principali componenti realizzati.}
-
 \section{Tecnologie e strumenti}
 \label{sec:tecnologie-strumenti}
 
@@ -111,7 +109,8 @@ Il flusso di esecuzione di una pianificazione segue le fasi descritte di seguito
 Il \texttt{TwoPhaseSolver} implementa una pipeline di risoluzione a due fasi per gestire la complessità del problema in presenza di calendari lavorativi e vincoli multipli.
 
 \begin{itemize}
-    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato (\texttt{BuildMode::Phase1Light}), privo dei vincoli di calendario lavorativo. L'obiettivo è trovare rapidamente una soluzione fattibile, minimizzando il makespan oppure la sola fattibilità a seconda della configurazione, così da disporre in tempi brevi di una base di partenza per la fase successiva.
+    \item \textbf{Fase 1 (Light)}: risolve il problema su un modello semplificato 
+    \\ (\texttt{BuildMode::Phase1Light}), privo dei vincoli di calendario lavorativo. L'obiettivo è trovare rapidamente una soluzione fattibile, minimizzando il makespan oppure la sola fattibilità a seconda della configurazione, così da disporre in tempi brevi di una base di partenza per la fase successiva.
     \item \textbf{Hinting}: i tempi di inizio risolti nella fase 1 e le macchine effettivamente scelte vengono trasferiti, tramite la funzione \texttt{applyHintToModel}, come suggerimento al modello completo della fase 2. Poiché il modello \textit{light} lavora su un tempo continuo coincidente con l'asse tempo-lavorativo della fase 2, i valori di inizio sono mappati direttamente su quest'ultimo, da cui il solver deriva per propagazione le restanti variabili. L'hint guida così il solver verso una regione promettente dello spazio di ricerca.
     \item \textbf{Fase 2 (Full)}: ottimizza la lateness totale dei job sul modello completo (\texttt{BuildMode::Phase2Full}) partendo dall'hint. Gestisce i calendari giornalieri per macchina e i tempi di attrezzaggio dinamici, oltre a includere tutti i vincoli di precedenza e di capacità cumulativa.
 \end{itemize}
